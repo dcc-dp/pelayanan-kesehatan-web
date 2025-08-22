@@ -36,41 +36,43 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json(
       {
-        error: error,
+        error: error.message,
       },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(request, { params }) {
-  const userId = params.id; // user id from the request parameters
-
+export async function PUT(request) {
   try {
     const data = await request.json();
+    const userId = data.id;
     const db = await pool.getConnection();
 
     const query =
       "UPDATE users SET name = ?, password = ?, email = ? WHERE id = ?";
-    await db.execute(query, [data.name, data.email, userId]);
+    await db.execute(query, [data.name, data.password, data.email, userId]);
     db.release();
 
     return NextResponse.json({ message: "User updated successfully" });
   } catch (error) {
     return NextResponse.json(
       {
-        error: error,
+        error: error.message,
       },
-      { status: 500 }
+      { status: 500,
+        error: error.message
+       }
     );
   }
 }
 
-export async function DELETE(request, { params }) {
-  const userId = params.id; // user id from the request parameters
+export async function DELETE(request) {
 
   try {
+    const data = await request.json();
     const db = await pool.getConnection();
+    const userId = data.id;
 
     const query = "DELETE FROM users WHERE id = ?";
     await db.execute(query, [userId]);
