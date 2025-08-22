@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 25, 2025 at 05:16 PM
--- Server version: 8.0.30
--- PHP Version: 8.2.29
+-- Generation Time: Aug 22, 2025 at 05:16 PM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.16
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `pelayanan-kesehatan`
+-- Database: `pelayanan-kesehatan-web`
 --
 
 -- --------------------------------------------------------
@@ -31,8 +31,8 @@ CREATE TABLE `bookings` (
   `id` int NOT NULL,
   `recipes_id` int NOT NULL,
   `total` int NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -45,8 +45,8 @@ CREATE TABLE `category_spesialis` (
   `id` int NOT NULL,
   `specialis_name` int NOT NULL,
   `description` int NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -59,8 +59,8 @@ CREATE TABLE `consultations` (
   `id` int NOT NULL,
   `users_id` int NOT NULL,
   `doctors_id` int NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -76,8 +76,8 @@ CREATE TABLE `details` (
   `jumlah_minum` int NOT NULL,
   `jumlah_hari` int NOT NULL,
   `waktu_minum` enum('before_eat','after_eat') NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -92,8 +92,8 @@ CREATE TABLE `doctor` (
   `description` text NOT NULL,
   `license` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `certificate` text NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -107,8 +107,8 @@ CREATE TABLE `drugs` (
   `name` varchar(100) NOT NULL,
   `type` text NOT NULL,
   `price` int NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -120,7 +120,22 @@ CREATE TABLE `drugs` (
 CREATE TABLE `recipes` (
   `id` int NOT NULL,
   `users_id` int NOT NULL,
-  `doctors_id` int NOT NULL
+  `doctors_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reminder_schedule`
+--
+
+CREATE TABLE `reminder_schedule` (
+  `id` int NOT NULL,
+  `users_id` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -136,8 +151,8 @@ CREATE TABLE `schedules` (
   `date` date NOT NULL,
   `time` time NOT NULL,
   `status` enum('proses','tolak','terima') NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -149,17 +164,25 @@ CREATE TABLE `schedules` (
 CREATE TABLE `users` (
   `id` int NOT NULL,
   `name` varchar(100) NOT NULL,
-  `gender` enum('perempuan','laki-laki') NOT NULL,
-  `birth` date NOT NULL,
-  `address` text NOT NULL,
-  `whatsapp` int NOT NULL,
+  `gender` enum('perempuan','laki-laki') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `birth` date DEFAULT NULL,
+  `address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `whatsapp` int DEFAULT NULL,
   `password` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `image` text NOT NULL,
-  `role` varchar(50) NOT NULL,
-  `created_at` timestamp NOT NULL,
-  `updated_at` timestamp NOT NULL
+  `image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `role` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'user',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `gender`, `birth`, `address`, `whatsapp`, `password`, `email`, `image`, `role`, `created_at`, `updated_at`) VALUES
+(2, 'safira', NULL, NULL, NULL, NULL, '123456', 'safira@mustafa.com', NULL, 'user', '2025-08-22 16:14:42', '2025-08-22 16:14:42'),
+(3, 'safirahhhhhhhhhhhhhhhhh', NULL, NULL, NULL, NULL, '123456', 'safira@mustafa.com', NULL, 'user', '2025-08-22 16:17:09', '2025-08-22 16:17:09');
 
 --
 -- Indexes for dumped tables
@@ -205,6 +228,12 @@ ALTER TABLE `drugs`
 -- Indexes for table `recipes`
 --
 ALTER TABLE `recipes`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `reminder_schedule`
+--
+ALTER TABLE `reminder_schedule`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -266,6 +295,12 @@ ALTER TABLE `recipes`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `reminder_schedule`
+--
+ALTER TABLE `reminder_schedule`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `schedules`
 --
 ALTER TABLE `schedules`
@@ -275,7 +310,7 @@ ALTER TABLE `schedules`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
