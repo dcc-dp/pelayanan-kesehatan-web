@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".", // <-- TAMBAHKAN INI
+    "paths": {      // <-- TAMBAHKAN INI
+      "@/*": ["./*"] // <-- TAMBAHKAN INI (sesuai dengan libs di root project)
+    },
+    "target": "ES2017",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true, // Biarkan ini true, karena Anda pakai JS
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node", // Untuk App Router, "bundler" lebih umum/disarankan, tapi "node" harusnya juga bekerja.
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",  // <-- TAMBAHKAN INI agar file .js juga di-lint dan di-resolve oleh TS
+    "**/*.jsx" // <-- TAMBAHKAN INI jika Anda menggunakan file .jsx
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
