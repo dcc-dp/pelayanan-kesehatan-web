@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import pool from "@/libs/mysql";
 
 export async function GET(request, { params }) {
-  const reminder_scheduleId = params.id; // user id
+  const schedulesId = params.id; // user id
 
   try {
     const db = await pool.getConnection();
 
-    const query = "select * from reminder_schedule where id = ?";
-    const [rows] = await db.execute(query, [reminder_scheduleId]);
+    const query = "select * from schedule where id = ?";
+    const [rows] = await db.execute(query, [schedulesId]);
     db.release();
 
     return NextResponse.json(rows);
