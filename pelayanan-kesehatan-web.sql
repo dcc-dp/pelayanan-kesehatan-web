@@ -88,6 +88,7 @@ CREATE TABLE `details` (
 
 CREATE TABLE `doctor` (
   `id` int NOT NULL,
+  `users_id` int NOT NULL,
   `category` int DEFAULT NULL,
   `description` text NOT NULL,
   `license` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
@@ -125,18 +126,6 @@ CREATE TABLE `recipes` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `reminder_schedule`
---
-
-CREATE TABLE `reminder_schedule` (
-  `id` int NOT NULL,
-  `users_id` int DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
