@@ -4,13 +4,24 @@ import pool from "@/src/libs/mysql";
 export async function GET() {
   try {
     const db = await pool.getConnection();
-    const query = "select * from schedules";
+    const query = `
+    SELECT 
+      s.id,
+      s.date, 
+      s.time, 
+      s.status, 
+      u.name AS nama_pasien, 
+      drs.id 
+      FROM schedules AS s 
+      INNER JOIN users AS u ON s.users_id = u.id 
+      INNER JOIN doctor AS drs ON s.doctors_id = drs.id
+    `;
     const [rows] = await db.execute(query);
     db.release();
 
     return NextResponse.json(rows);
   } catch (error) {
-    return NextResponse.json(
+    return NextResponse.json(c
       {
         error: error.message,
       },
