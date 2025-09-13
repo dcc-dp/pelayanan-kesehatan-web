@@ -19,10 +19,10 @@ export async function GET() {
     d.description AS deskripsi,
     d.license AS lisensi,
     d.certificate AS sertifikat
-  FROM consultations c
+  FROM recipes c
   INNER JOIN users u1 ON c.users_id = u1.id
   INNER JOIN doctor d ON c.doctors_id = d.id
-  INNER JOIN users u2 ON d.users_id = u2.id
+  INNER JOIN users u2 ON d.users_id = u2.idz
 `;
     const [rows] = await db.execute(query);
     db.release();

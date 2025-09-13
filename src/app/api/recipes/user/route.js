@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import pool from "@/src/libs/mysql";
 
 export async function GET(request, { params }) {
-  const recipesId = params.id; // user id
+  const recipesUserId = params.id; // user id
 
   try {
     const db = await pool.getConnection();
@@ -25,10 +25,10 @@ export async function GET(request, { params }) {
   INNER JOIN users u1 ON c.users_id = u1.id
   INNER JOIN doctor d ON c.doctors_id = d.id
   INNER JOIN users u2 ON d.users_id = u2.id
-  WHERE c.id = ?
+  WHERE u1.id = ?
 `;
 
-    const [rows] = await db.execute(query, [recipesId]);
+    const [rows] = await db.execute(query, [recipesUserId]);
     db.release();
 
     return NextResponse.json(rows);
