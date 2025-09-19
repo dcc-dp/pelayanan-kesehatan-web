@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql"; 
+import pool from "@/src/libs/mysql";
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
       s.time, 
       s.status, 
       u.name AS nama_pasien, 
-      drs.id 
+      drs.id AS doctor_id
       FROM schedules AS s 
       INNER JOIN users AS u ON s.users_id = u.id 
       INNER JOIN doctor AS drs ON s.doctors_id = drs.id
@@ -21,7 +21,7 @@ export async function GET() {
 
     return NextResponse.json(rows);
   } catch (error) {
-    return NextResponse.json(c
+    return NextResponse.json(
       {
         error: error.message,
       },
@@ -35,8 +35,15 @@ export async function POST(request) {
     const data = await request.json();
     const db = await pool.getConnection();
 
-    const query = "INSERT INTO schedules(users_id, doctors_id, date, time, status) VALUES (?, ?, ?, ?, ?)";
-    const [result] = await db.execute(query, [data.users_id, data.doctors_id, data.date, data.time, data.status]);
+    const query =
+      "INSERT INTO schedules(users_id, doctors_id, date, time, status) VALUES (?, ?, ?, ?, ?)";
+    const [result] = await db.execute(query, [
+      data.users_id,
+      data.doctors_id,
+      data.date,
+      data.time,
+      data.status,
+    ]);
     db.release();
 
     return NextResponse.json({ id: result.insertId }, { status: 201 });
@@ -56,8 +63,16 @@ export async function PUT(request) {
     const schedulesId = data.id; // user id from the request parameters
     const db = await pool.getConnection();
 
-    const query = "UPDATE schedules SET users_id = ?, doctors_id = ?, date = ?, time = ?, status = ? WHERE id = ?";
-    await db.execute(query, [data.users_id, data.doctors_id, data.date, data.time, data.status, schedulesId]);
+    const query =
+      "UPDATE schedules SET users_id = ?, doctors_id = ?, date = ?, time = ?, status = ? WHERE id = ?";
+    await db.execute(query, [
+      data.users_id,
+      data.doctors_id,
+      data.date,
+      data.time,
+      data.status,
+      schedulesId,
+    ]);
     db.release();
 
     return NextResponse.json({

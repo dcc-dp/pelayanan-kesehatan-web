@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/libs/mysql";
+import pool from "@/src/libs/mysql";
 
 export async function GET(request, { params }) {
   const schedulesId = params.id; // user id
