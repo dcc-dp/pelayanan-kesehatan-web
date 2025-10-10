@@ -1,6 +1,77 @@
 import { NextResponse } from "next/server";
 import pool from "@/src/libs/mysql";
 
+/**
+ * @swagger
+ * /api/overview/recipes/{id}:
+ *   get:
+ *     summary: Mendapatkan daftar resep berdasarkan ID user
+ *     description: Endpoint ini digunakan untuk mengambil daftar resep milik user beserta informasi dokter yang membuatnya.
+ *     tags:
+ *       - Overview - Recipes
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID user yang ingin diambil data resepnya
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Berhasil mendapatkan daftar resep user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   pasien:
+ *                     type: string
+ *                     example: Syah
+ *                     description: Nama pasien
+ *                   gender:
+ *                     type: string
+ *                     example: Laki-laki
+ *                   email:
+ *                     type: string
+ *                     example: syah@example.com
+ *                   tgl_lahir:
+ *                     type: string
+ *                     format: date
+ *                     example: 2001-05-21
+ *                   alamat:
+ *                     type: string
+ *                     example: Jl. Melati No. 10, Makassar
+ *                   nomor_wa:
+ *                     type: string
+ *                     example: "081234567890"
+ *                   foto:
+ *                     type: string
+ *                     example: https://example.com/profile.jpg
+ *                   role:
+ *                     type: string
+ *                     example: user
+ *                   dokter:
+ *                     type: string
+ *                     example: dr. Andi Wijaya
+ *                     description: Nama dokter yang memberikan resep
+ *                   deskripsi:
+ *                     type: string
+ *                     example: Spesialis penyakit dalam
+ *                   lisensi:
+ *                     type: string
+ *                     example: SIP-123456
+ *                   sertifikat:
+ *                     type: string
+ *                     example: https://example.com/certificate.pdf
+ *       404:
+ *         description: Tidak ada resep ditemukan untuk user tersebut
+ *       500:
+ *         description: Terjadi kesalahan di server
+ */
+
 export async function GET(request, { params }) {
   const recipesUserId = params.id; // user id
 
