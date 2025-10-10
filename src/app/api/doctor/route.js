@@ -25,12 +25,14 @@ export async function POST(request) {
     const db = await pool.getConnection();
 
     const query =
-      "INSERT INTO doctor (category_spesialis_id, description, license, certificate) VALUES (?, ?, ?, ?)";
+      "INSERT INTO doctor (users_id, category_spesialis_id, description, license, certificate, role) VALUES (?, ?, ?, ?, ?, ?)";
     const [result] = await db.execute(query, [
+      data.users_id,
       data.category_spesialis_id,
       data.description,
       data.license,
       data.certificate,
+      'doctor',
     ]);
     db.release();
 
