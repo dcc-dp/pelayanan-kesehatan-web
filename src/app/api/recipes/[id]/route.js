@@ -131,9 +131,6 @@ export async function GET(request, { params }) {
 
     return NextResponse.json(rows[0]);
   } catch (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
