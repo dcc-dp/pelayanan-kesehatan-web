@@ -1,21 +1,172 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Doctor
+ *   description: API untuk mengelola data dokter
+ */
+
+/**
+ * @swagger
+ * /api/doctor:
+ *   get:
+ *     summary: Mendapatkan semua data dokter
+ *     tags: [Doctor]
+ *     responses:
+ *       200:
+ *         description: Berhasil mengambil daftar dokter
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   category:
+ *                     type: string
+ *                     example: "Dokter Umum"
+ *                   description:
+ *                     type: string
+ *                     example: "Dokter dengan pengalaman 10 tahun"
+ *                   license:
+ *                     type: string
+ *                     example: "STR-2025-0001"
+ *                   certificate:
+ *                     type: string
+ *                     example: "sertifikat_umum.pdf"
+ *       500:
+ *         description: Terjadi kesalahan server
+ */
+
+/**
+ * @swagger
+ * /api/doctor:
+ *   post:
+ *     summary: Menambahkan data dokter baru
+ *     tags: [Doctor]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 example: "Dokter Gigi"
+ *               description:
+ *                 type: string
+ *                 example: "Spesialis gigi dan mulut"
+ *               license:
+ *                 type: string
+ *                 example: "STR-2025-0100"
+ *               certificate:
+ *                 type: string
+ *                 example: "gigi_certificate.pdf"
+ *     responses:
+ *       201:
+ *         description: Dokter berhasil ditambahkan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 12
+ *       500:
+ *         description: Terjadi kesalahan server
+ */
+
+/**
+ * @swagger
+ * /api/doctor:
+ *   put:
+ *     summary: Memperbarui data dokter
+ *     tags: [Doctor]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 3
+ *               category:
+ *                 type: string
+ *                 example: "Dokter Bedah"
+ *               description:
+ *                 type: string
+ *                 example: "Ahli bedah umum berpengalaman"
+ *               license:
+ *                 type: string
+ *                 example: "STR-2025-0200"
+ *               certificate:
+ *                 type: string
+ *                 example: "surgery_cert.pdf"
+ *     responses:
+ *       200:
+ *         description: Data dokter berhasil diperbarui
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: doctor updated successfully
+ *       500:
+ *         description: Terjadi kesalahan server
+ */
+
+/**
+ * @swagger
+ * /api/doctor:
+ *   delete:
+ *     summary: Menghapus data dokter
+ *     tags: [Doctor]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 5
+ *     responses:
+ *       200:
+ *         description: Data dokter berhasil dihapus
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: doctor deleted successfully
+ *       500:
+ *         description: Terjadi kesalahan server
+ */
+
 import { NextResponse } from "next/server";
 import pool from "@/src/libs/mysql";
 
 export async function GET() {
   try {
     const db = await pool.getConnection();
-    const query = "select * from doctor";
+    const query = "SELECT * FROM doctor";
     const [rows] = await db.execute(query);
     db.release();
 
     return NextResponse.json(rows);
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -36,21 +187,14 @@ export async function POST(request) {
 
     return NextResponse.json({ id: result.insertId }, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
 export async function PUT(request) {
- 
-
   try {
     const data = await request.json();
-    const doctorId = data.id; // user id from the request parameters
+    const doctorId = data.id;
     const db = await pool.getConnection();
 
     const query =
@@ -66,32 +210,22 @@ export async function PUT(request) {
 
     return NextResponse.json({ message: "doctor updated successfully" });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
 export async function DELETE(request) {
-
   try {
     const db = await pool.getConnection();
     const data = await request.json();
-    const doctorId = data.id; // user id from the request parameters
+    const doctorId = data.id;
+
     const query = "DELETE FROM doctor WHERE id = ?";
     await db.execute(query, [doctorId]);
     db.release();
 
     return NextResponse.json({ message: "doctor deleted successfully" });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
