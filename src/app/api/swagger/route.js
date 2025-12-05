@@ -22,5 +22,7 @@ export async function GET() {
       </body>
     </html>
   `;
-  return new Response(swaggerHtml, { headers: { "Content-Type": "text/html" } });
+  return new Response(swaggerHtml, {
+    headers: { "Content-Type": "text/html" },
+  });
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql"; 
+import pool from "../../../../../lib/mysql";
+
 
 /**
  * @swagger
@@ -45,7 +46,7 @@ import pool from "@/src/libs/mysql";
  */
 
 export async function GET(request, { params }) {
-  const bookings = params.id; // user id
+  const bookingsId = params.id; 
 
   try {
     const db = await pool.getConnection();

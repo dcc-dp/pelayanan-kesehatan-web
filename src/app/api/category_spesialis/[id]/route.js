@@ -1,64 +1,60 @@
 import { NextResponse } from "next/server";
-import pool from "@/libs/mysql";
+import pool from "@/src/libs/mysql";
 
 /**
  * @swagger
  * /api/category_spesialis/{id}:
  *   get:
  *     summary: Mendapatkan detail kategori spesialis berdasarkan ID
- *     description: Mengambil satu data kategori spesialis dari database menggunakan parameter ID.
+ *     description: Mengambil satu data kategori spesialis dari database berdasarkan ID.
  *     tags: [Category Spesialis]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: ID kategori spesialis
  *         schema:
  *           type: integer
- *           example: 3
- *         description: ID kategori spesialis yang ingin diambil
+ *           example: 1
  *     responses:
  *       200:
  *         description: Data kategori spesialis berhasil diambil
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 3
- *                   specialis_name:
- *                     type: string
- *                     example: "Kardiologi"
- *                   description:
- *                     type: string
- *                     example: "Spesialis penyakit jantung dan pembuluh darah"
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 specialis_name:
+ *                   type: string
+ *                 description:
+ *                   type: string
  *       404:
- *         description: Data kategori spesialis tidak ditemukan
+ *         description: Data tidak ditemukan
  *       500:
  *         description: Terjadi kesalahan pada server
  */
-
-
 export async function GET(request, { params }) {
-  const category_spesialisId = params.id; // user id
+  const id = params.id;
 
   try {
     const db = await pool.getConnection();
-
-    const query = "select * from category_spesialis where id = ?";
-    const [rows] = await db.execute(query, [category_spesialisId]);
+    const [rows] = await db.execute(
+      "SELECT * FROM category_spesialis WHERE id = ?",
+      [id]
+    );
     db.release();
 
-    return NextResponse.json(rows);
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { error: "Kategori spesialis tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(rows[0]);
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

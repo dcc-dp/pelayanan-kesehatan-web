@@ -1,17 +1,19 @@
-import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: API untuk mengelola data pengguna (users)
+ */
 
 /**
  * @swagger
  * /api/users:
  *   get:
- *     summary: Mendapatkan semua user
- *     description: Endpoint ini mengembalikan daftar semua user dari database.
- *     tags:
- *       - Users
+ *     summary: Mendapatkan semua data pengguna
+ *     tags: [Users]
  *     responses:
  *       200:
- *         description: Berhasil mendapatkan daftar user
+ *         description: Berhasil mengambil daftar pengguna
  *         content:
  *           application/json:
  *             schema:
@@ -21,42 +23,26 @@ import pool from "@/src/libs/mysql";
  *                 properties:
  *                   id:
  *                     type: integer
+ *                     example: 1
  *                   name:
  *                     type: string
- *                   gender:
- *                     type: string
- *                   birth:
- *                     type: string
- *                   address:
- *                     type: string
- *                   whatsapp:
- *                     type: string
+ *                     example: "Ranti"
  *                   email:
  *                     type: string
- *                   image:
+ *                     example: "ranti@example.com"
+ *                   password:
  *                     type: string
+ *                     example: "hashed_password"
+ *       500:
+ *         description: Terjadi kesalahan pada server
  */
-export async function GET() {
-  try {
-    const db = await pool.getConnection();
-    const query = "SELECT * FROM users";
-    const [rows] = await db.execute(query);
-    db.release();
-
-    return NextResponse.json(rows);
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
 
 /**
  * @swagger
  * /api/users:
  *   post:
- *     summary: Menambahkan user baru
- *     description: Endpoint ini digunakan untuk menambahkan data user baru ke dalam database.
- *     tags:
- *       - Users
+ *     summary: Menambahkan pengguna baru
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -65,40 +51,21 @@ export async function GET() {
  *             type: object
  *             required:
  *               - name
- *               - gender
- *               - birth
- *               - address
- *               - whatsapp
- *               - password
  *               - email
+ *               - password
  *             properties:
  *               name:
  *                 type: string
- *                 example: Syah
- *               gender:
- *                 type: string
- *                 example: Perempuan
- *               birth:
- *                 type: string
- *                 example: 2002-05-12
- *               address:
- *                 type: string
- *                 example: Jl. Melati No. 45, Makassar
- *               whatsapp:
- *                 type: string
- *                 example: 08123456789
- *               password:
- *                 type: string
- *                 example: rahasia123
+ *                 example: "Ranti"
  *               email:
  *                 type: string
- *                 example: syah@example.com
- *               image:
+ *                 example: "ranti@example.com"
+ *               password:
  *                 type: string
- *                 example: https://example.com/avatar.jpg
+ *                 example: "123456"
  *     responses:
  *       201:
- *         description: User berhasil ditambahkan
+ *         description: Pengguna berhasil ditambahkan
  *         content:
  *           application/json:
  *             schema:
@@ -106,45 +73,17 @@ export async function GET() {
  *               properties:
  *                 id:
  *                   type: integer
- *                   example: 1
+ *                   example: 10
  *       500:
- *         description: Terjadi kesalahan pada server
+ *         description: Terjadi kesalahan saat menambahkan pengguna
  */
-export async function POST(request) {
-  try {
-    const data = await request.json();
-    const db = await pool.getConnection();
-
-    const query = `
-      INSERT INTO users (name, gender, birth, address, whatsapp, password, email, image)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const [result] = await db.execute(query, [
-      data.name,
-      data.gender,
-      data.birth,
-      data.address,
-      data.whatsapp,
-      data.password,
-      data.email,
-      data.image ?? null,
-    ]);
-    db.release();
-
-    return NextResponse.json({ id: result.insertId }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
 
 /**
  * @swagger
  * /api/users:
  *   put:
- *     summary: Memperbarui data user
- *     description: Endpoint ini digunakan untuk memperbarui data user berdasarkan ID.
- *     tags:
- *       - Users
+ *     summary: Memperbarui data pengguna berdasarkan ID
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -154,44 +93,24 @@ export async function POST(request) {
  *             required:
  *               - id
  *               - name
- *               - gender
- *               - birth
- *               - address
- *               - whatsapp
- *               - password
  *               - email
+ *               - password
  *             properties:
  *               id:
  *                 type: integer
- *                 description: ID user yang ingin diperbarui
  *                 example: 1
  *               name:
  *                 type: string
- *                 example: Syah Updated
- *               gender:
- *                 type: string
- *                 example: Perempuan
- *               birth:
- *                 type: string
- *                 example: 2002-05-12
- *               address:
- *                 type: string
- *                 example: Jl. Kenanga No. 23, Makassar
- *               whatsapp:
- *                 type: string
- *                 example: 08123456789
- *               password:
- *                 type: string
- *                 example: rahasiaBaru123
+ *                 example: "Ranti Updated"
  *               email:
  *                 type: string
- *                 example: syah.updated@example.com
- *               image:
+ *                 example: "ranti_updated@example.com"
+ *               password:
  *                 type: string
- *                 example: https://example.com/new-avatar.jpg
+ *                 example: "newpassword123"
  *     responses:
  *       200:
- *         description: User berhasil diperbarui
+ *         description: Pengguna berhasil diperbarui
  *         content:
  *           application/json:
  *             schema:
@@ -199,56 +118,17 @@ export async function POST(request) {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: User updated successfully
- *       404:
- *         description: User tidak ditemukan
+ *                   example: "User updated successfully"
  *       500:
- *         description: Terjadi kesalahan di server
+ *         description: Terjadi kesalahan saat memperbarui data pengguna
  */
-export async function PUT(request) {
-  try {
-    const data = await request.json();
-    const db = await pool.getConnection();
-
-    const query = `
-      UPDATE users
-      SET name = ?, gender = ?, birth = ?, address = ?, whatsapp = ?, password = ?, email = ?, image = ?
-      WHERE id = ?
-    `;
-    const [result] = await db.execute(query, [
-      data.name,
-      data.gender,
-      data.birth,
-      data.address,
-      data.whatsapp,
-      data.password,
-      data.email,
-      data.image ?? null,
-      data.id,
-    ]);
-    db.release();
-
-    if (result.affectedRows === 0) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ message: "User updated successfully" });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
 
 /**
  * @swagger
  * /api/users:
  *   delete:
- *     summary: Menghapus user
- *     description: Endpoint ini digunakan untuk menghapus user berdasarkan ID.
- *     tags:
- *       - Users
+ *     summary: Menghapus data pengguna berdasarkan ID
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -260,11 +140,10 @@ export async function PUT(request) {
  *             properties:
  *               id:
  *                 type: integer
- *                 description: ID user yang ingin dihapus
- *                 example: 1
+ *                 example: 3
  *     responses:
  *       200:
- *         description: User berhasil dihapus
+ *         description: Pengguna berhasil dihapus
  *         content:
  *           application/json:
  *             schema:
@@ -272,28 +151,7 @@ export async function PUT(request) {
  *               properties:
  *                 message:
  *                   type: string
- *                   example: User deleted successfully
- *       404:
- *         description: User tidak ditemukan
+ *                   example: "User deleted successfully"
  *       500:
- *         description: Terjadi kesalahan di server
+ *         description: Terjadi kesalahan saat menghapus pengguna
  */
-export async function DELETE(request) {
-  try {
-    const data = await request.json();
-    const db = await pool.getConnection();
-
-    const [result] = await db.execute("DELETE FROM users WHERE id = ?", [
-      data.id,
-    ]);
-    db.release();
-
-    if (result.affectedRows === 0) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ message: "User deleted successfully" });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}

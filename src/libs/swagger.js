@@ -1,21 +1,22 @@
-// src/libs/swagger.js
 import swaggerJSDoc from "swagger-jsdoc";
+import path from "path";
 
 const options = {
   definition: {
-    openapi: "3.0.0",
+    openapi: "3.0.3",
     info: {
-      title: "API Documentation - Pelayanan Kesehatan",
+      title: "Category Spesialis API",
       version: "1.0.0",
-      description: "Dokumentasi API untuk sistem pelayanan kesehatan.",
+      description: "Dokumentasi API Category Spesialis",
     },
     servers: [
       {
         url: "http://localhost:3000",
+        description: "Local server",
       },
     ],
   },
-  apis: ["./src/app/api/**/*.js", "./src/app/api/**/*.ts"], // tambahkan ts kalau kamu pakai TypeScript
+  apis: [path.resolve("./src/app/api/**/*.js")], // otomatis baca semua route.js termasuk [id]
 };
 
 const swaggerSpec = swaggerJSDoc(options);

@@ -1,80 +1,64 @@
-import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: API untuk mengelola data pengguna (users)
+ */
 
 /**
  * @swagger
  * /api/users/{id}:
  *   get:
- *     summary: Mendapatkan data user berdasarkan ID
- *     description: Endpoint ini mengembalikan detail data user berdasarkan ID yang diberikan.
- *     tags:
- *       - Users
+ *     summary: Mendapatkan data pengguna berdasarkan ID
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
- *         description: ID user yang ingin diambil datanya
+ *         description: ID pengguna yang ingin diambil
  *         schema:
  *           type: integer
  *           example: 1
  *     responses:
  *       200:
- *         description: Berhasil mendapatkan data user
+ *         description: Data pengguna berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Ranti"
+ *                   email:
+ *                     type: string
+ *                     example: "ranti@example.com"
+ *                   password:
+ *                     type: string
+ *                     example: "hashed_password"
+ *       404:
+ *         description: Pengguna tidak ditemukan
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 name:
+ *                 message:
  *                   type: string
- *                   example: Syah
- *                 gender:
- *                   type: string
- *                   example: Male
- *                 birth:
- *                   type: string
- *                   format: date
- *                   example: 2003-05-15
- *                 address:
- *                   type: string
- *                   example: Makassar, Sulawesi Selatan
- *                 whatsapp:
- *                   type: string
- *                   example: "081234567890"
- *                 email:
- *                   type: string
- *                   example: syah@example.com
- *                 image:
- *                   type: string
- *                   example: https://example.com/profile.jpg
- *       400:
- *         description: ID tidak valid atau tidak diberikan
- *       404:
- *         description: User tidak ditemukan
+ *                   example: "User not found"
  *       500:
- *         description: Terjadi kesalahan di server
+ *         description: Terjadi kesalahan pada server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Database connection failed"
  */
-
-export async function GET(request, { params }) {
-  const userId = params.id; // user id
-
-  try {
-    const db = await pool.getConnection();
-
-    const query = "select * from users where id = ?";
-    const [rows] = await db.execute(query, [userId]);
-    db.release();
-
-    return NextResponse.json(rows);
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: error. message,
-      },
-      { error: error.message, status: 500 }
-    );
-  }
-}
