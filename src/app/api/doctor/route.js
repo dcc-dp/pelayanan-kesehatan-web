@@ -176,9 +176,9 @@ export async function POST(request) {
     const db = await pool.getConnection();
 
     const query =
-      "INSERT INTO doctor (category, description, license, certificate) VALUES (?, ?, ?, ?)";
+      "INSERT INTO doctor (category_spesialis_id, description, license, certificate) VALUES (?, ?, ?, ?)";
     const [result] = await db.execute(query, [
-      data.category,
+      data.category_spesialis_id,
       data.description,
       data.license,
       data.certificate,
@@ -198,9 +198,9 @@ export async function PUT(request) {
     const db = await pool.getConnection();
 
     const query =
-      "UPDATE doctor SET category = ?, description = ?, license = ?, certificate = ? WHERE id = ?";
+      "UPDATE doctor SET category_spesialis_id = ?, description = ?, license = ?, certificate = ? WHERE id = ?";
     await db.execute(query, [
-      data.category,
+      data.category_spesialis_id,
       data.description,
       data.license,
       data.certificate,
