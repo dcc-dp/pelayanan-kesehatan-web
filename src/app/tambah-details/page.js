@@ -4,11 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaClipboardCheck } from "react-icons/fa";
 
-const TambahConsultations = () => {
+const TambahDetails = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    users_id: "",
-    doctors_id: "",
+    recipes_id: "",
+    drugs_id: "",
+    jumlah_minum: "",
+    jumlah_hari: "",
+    waktu_minum: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,24 +28,24 @@ const TambahConsultations = () => {
     setLoading(true);
     setError(null);
 
-    if (!formData.users_id || !formData.doctors_id) {
+    if (!formData.recipes_id || !formData.drugs_id || !formData.jumlah_minum || !formData.jumlah_hari || !formData.waktu_minum) {
       setError("Semua field wajib diisi!");
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch("/api/consultations", {
+      const res = await fetch("/api/details", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Gagal menambahkan consultations");
+      if (!res.ok) throw new Error(result.error || "Gagal menambahkan details");
 
       setSuccess(true);
-      setTimeout(() => router.push("/consultations"), 1500);
+      setTimeout(() => router.push("/details"), 1500);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -57,7 +60,7 @@ const TambahConsultations = () => {
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold text-pink-400 flex justify-center items-center gap-3">
             <FaClipboardCheck className="text-pink-400" />
-            Tambah consultations
+            Tambah Details
           </h1>
       
         </div>
@@ -66,26 +69,50 @@ const TambahConsultations = () => {
 
         
           <FormGroup
-            label="User ID"
-            name="users_id"
+            label=" Recipes ID"
+            name="recipes_id"
             type="number"
-            value={formData.users_id}
+            value={formData.recipes_id}
             onChange={handleInputChange}
           />
 
        
           <FormGroup
-            label="Doctor ID"
-            name="doctors_id"
+            label=" Drugs ID"
+            name="drugs_id"
             type="number"
-            value={formData.doctors_id}
+            value={formData.drugs_id}
+            onChange={handleInputChange}
+          />
+
+          <FormGroup
+            label=" Jumlah minum"
+            name="jumlah_minum"
+            type="number"
+            value={formData.jumlah_minum}
+            onChange={handleInputChange}
+          />
+
+          <FormGroup
+            label=" jumlah hari"
+            name="jumlah_hari"
+            type="number"
+            value={formData.jumlah_hari}
+            onChange={handleInputChange}
+          />
+
+          <FormGroup
+            label=" Waktu minum"
+            name="waktu_minum"
+            type="enum"
+            value={formData.waktu_minum}
             onChange={handleInputChange}
           />
 
          
-          {loading && <p className="text-blue-600 text-sm">Menyimpan consultations...</p>}
+          {loading && <p className="text-blue-600 text-sm">Menyimpan details...</p>}
           {error && <p className="text-red-600 text-sm">Error: {error}</p>}
-          {success && <p className="text-green-600 text-sm">consultations berhasil ditambahkan. Mengalihkan...</p>}
+          {success && <p className="text-green-600 text-sm">details berhasil ditambahkan. Mengalihkan...</p>}
 
           <div className="flex gap-3 pt-2">
             <button
@@ -125,4 +152,4 @@ const FormGroup = ({ label, name, value, onChange, type = "text" }) => (
   </div>
 );
 
-export default TambahConsultations;
+export default TambahDetails;

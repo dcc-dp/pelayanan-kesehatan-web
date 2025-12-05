@@ -6,65 +6,65 @@ import { FaClipboardList, FaPlusSquare } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
 
-const DataBooking = () => {
-  const [bookingData, setBookingData] = useState([]);
+const DataDetails = () => {
+  const [detailsData, setDetailsData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchBooking() {
+    async function fetchDetails() {
       try {
         setLoading(true);
-        const response = await fetch("/api/bookings");
+        const response = await fetch("/api/details");
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("Data Booking dari API:", data);
-        setBookingData(data);
+        console.log("details dari API:", data);
+        setDetailsData(data);
       } catch (error) {
-        console.error("Error fetching booking:", error);
+        console.error("Error fetching details:", error);
         setError(error.message);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchBooking();
+    fetchDetails();
   }, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Yakin ingin menghapus booking ini?")) return;
+    if (!confirm("Yakin ingin menghapus details ini?")) return;
 
     try {
-      const response = await fetch(`/api/bookings/${id}`, {
+      const response = await fetch(`/api/details/${id}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error("Gagal menghapus booking");
+        throw new Error("Gagal menghapus details");
       }
 
-      setBookingData((prev) => prev.filter((item) => item.id !== id));
-      alert("Booking berhasil dihapus!");
+      setDetailsData((prev) => prev.filter((item) => item.id !== id));
+      alert("details berhasil dihapus!");
     } catch (error) {
-      console.error("Gagal menghapus booking:", error);
-      alert("Terjadi kesalahan saat menghapus booking.");
+      console.error("Gagal menghapus details:", error);
+      alert("Terjadi kesalahan saat menghapus details.");
     }
   };
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return bookingData;
+    if (!searchQuery) return detailsData;
 
-    return bookingData.filter((item) =>
+    return detailsData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [bookingData, searchQuery]);
+  }, [detailsData, searchQuery]);
 
   return (
     <div className="flex min-h-screen font-sans">
@@ -74,7 +74,7 @@ const DataBooking = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar Booking</span>
+            <span className="text-black">Daftar details</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
@@ -91,10 +91,10 @@ const DataBooking = () => {
               </button>
             </div>
 
-            <Link href="/tambah-bookings">
+            <Link href="/tambah-details">
               <button className="flex items-center bg-pink-300 hover:bg-pink-200 text-white px-3 py-2 rounded-md whitespace-nowrap">
                 <FaPlusSquare className="mr-2" />
-                Tambah Booking
+                Tambah 
               </button>
             </Link>
           </div>
@@ -116,8 +116,11 @@ const DataBooking = () => {
                   {[
                     "No",
                     "ID",
-                    "Resep",
-                    "Total",
+                    "recipes_id",
+                    "drugs_id",
+                    "jumlah_minum",
+                    "jumlah_hari",
+                    "waktu_minum",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -135,14 +138,14 @@ const DataBooking = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
-                    <tr
-                      key={`${item.id}-${index}`}
-                      className="hover:bg-gray-100"
-                    >
+                    <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
                       <td className="px-6 py-4 text-sm">{item.recipes_id}</td>
-                      <td className="px-6 py-4 text-sm">{item.total}</td>
+                      <td className="px-6 py-4 text-sm">{item.drugs_id}</td>
+                      <td className="px-6 py-4 text-sm">{item.drugs_id}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah_hari}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah_minum}</td>
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
                           ? new Date(item.created_at).toLocaleDateString()
@@ -155,7 +158,7 @@ const DataBooking = () => {
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        <Link href={`/booking/edit/${item.id}`}>
+                        <Link href={`/details/edit/${item.id}`}>
                           <button className="bg-blue-400 hover:bg-blue-300 text-white px-5 py-1 rounded-md text-sm">
                             Edit
                           </button>
@@ -176,7 +179,7 @@ const DataBooking = () => {
                       colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data booking ditemukan.
+                      Tidak ada details ditemukan.
                     </td>
                   </tr>
                 )}
@@ -189,4 +192,4 @@ const DataBooking = () => {
   );
 };
 
-export default DataBooking;
+export default DataDetails;

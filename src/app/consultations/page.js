@@ -135,7 +135,9 @@ const DataConsultations = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-gray-100">
+                    <tr 
+                     key={`${item.id}-${index}`}
+                     className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
                       <td className="px-6 py-4 text-sm">{item.users_id}</td>
