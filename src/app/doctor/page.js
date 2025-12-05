@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../consultations/components/addModal";
-import EditModal from "../consultations/components/editModal";
+import AddModal from "../doctor/components/addModal";
+import EditModal from "../doctor/components/editModal";
 
-const DataConsultations = () => {
-  const [consultationsData, setConsultationsData] = useState([]);
+const DataDoctor = () => {
+  const [doctorData, setDoctorData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,12 +20,12 @@ const DataConsultations = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/consultations");
+      const response = await fetch("/api/doctor");
 
       if (!response.ok) throw new Error("Gagal memuat data");
 
       const data = await response.json();
-      setConsultationsData(data);
+      setDoctorData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -42,16 +42,16 @@ const DataConsultations = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/consultations`, {
+      const response = await fetch(`/api/doctor`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus konsultasi");
+      if (!response.ok) throw new Error("Gagal menghapus dokter");
 
-      setConsultationsData((prev) => prev.filter((item) => item.id !== id));
-      alert("konsultasi berhasil dihapus!");
+      setDoctorData((prev) => prev.filter((item) => item.id !== id));
+      alert("dokter berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
@@ -60,14 +60,14 @@ const DataConsultations = () => {
 
   // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return consultationsData;
+    if (!searchQuery) return doctorData;
 
-    return consultationsData.filter((item) =>
+    return doctorData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [consultationsData, searchQuery]);
+  }, [doctorData, searchQuery]);
 
   return (
     <div className="flex min-h-screen font-sans">
@@ -77,7 +77,7 @@ const DataConsultations = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar konsultasi</span>
+            <span className="text-black">Daftar dokter</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
@@ -98,7 +98,7 @@ const DataConsultations = () => {
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-              Tambah konsultasi
+              Tambah dokter
             </button>
           </div>
         </div>
@@ -119,7 +119,10 @@ const DataConsultations = () => {
                     "No",
                     "ID",
                     "users_id",
-                    "doctors_id",
+                    "category",
+                    "description",
+                    "license",
+                    "certificate",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -143,7 +146,10 @@ const DataConsultations = () => {
                       <td className="px-6 py-4 text-sm">
                         {item.users_id}
                       </td>
-                      <td className="px-6 py-4 text-sm">{item.doctors_id}</td>
+                      <td className="px-6 py-4 text-sm">{item.category}</td>
+                      <td className="px-6 py-4 text-sm">{item.description}</td>
+                      <td className="px-6 py-4 text-sm">{item.description}</td>
+                      <td className="px-6 py-4 text-sm">{item.certificate}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
@@ -183,7 +189,7 @@ const DataConsultations = () => {
                       colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data kategori.
+                      Tidak ada data dokter.
                     </td>
                   </tr>
                 )}
@@ -211,4 +217,4 @@ const DataConsultations = () => {
   );
 };
 
-export default DataConsultations;
+export default DataDoctor;

@@ -78,17 +78,11 @@ export async function GET(request, { params }) {
 
     // Jika data tidak ditemukan
     if (rows.length === 0) {
-      return NextResponse.json(
-        { message: "Drugs not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Drugs not found" }, { status: 404 });
     }
 
     return NextResponse.json(rows[0]); // kirim objek tunggal
   } catch (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

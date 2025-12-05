@@ -76,14 +76,6 @@ export async function GET() {
  *     responses:
  *       201:
  *         description: Kategori spesialis berhasil ditambahkan
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 5
  *       400:
  *         description: Permintaan tidak valid
  *       500:
@@ -145,14 +137,6 @@ export async function POST(request) {
  *     responses:
  *       200:
  *         description: Data kategori spesialis berhasil diperbarui
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "category_spesialis updated successfully"
  *       404:
  *         description: Data tidak ditemukan
  *       500:
@@ -215,14 +199,6 @@ export async function PUT(request) {
  *     responses:
  *       200:
  *         description: Data kategori spesialis berhasil dihapus
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "category_spesialis deleted successfully"
  *       404:
  *         description: Data tidak ditemukan
  *       500:

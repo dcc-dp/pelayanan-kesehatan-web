@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import pool from "@/libs/mysql";
+import pool from "@/src/libs/mysql";
 
 /**
  * @swagger
  * /api/category_spesialis/{id}:
  *   get:
  *     summary: Mendapatkan detail kategori spesialis berdasarkan ID
- *     description: Mengambil satu data kategori spesialis dari database berdasarkan ID yang diberikan.
+ *     description: Mengambil satu data kategori spesialis dari database berdasarkan ID.
  *     tags: [Category Spesialis]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
- *         description: ID kategori spesialis yang ingin diambil
+ *         description: ID kategori spesialis
  *         schema:
  *           type: integer
  *           example: 1
@@ -26,26 +26,24 @@ import pool from "@/libs/mysql";
  *               properties:
  *                 id:
  *                   type: integer
- *                   example: 1
  *                 specialis_name:
  *                   type: string
- *                   example: "Psikologi"
  *                 description:
  *                   type: string
- *                   example: "Spesialis kesehatan mental dan perilaku"
  *       404:
- *         description: Data kategori spesialis tidak ditemukan
+ *         description: Data tidak ditemukan
  *       500:
  *         description: Terjadi kesalahan pada server
  */
-
 export async function GET(request, { params }) {
-  const category_spesialisId = params.id;
+  const id = params.id;
 
   try {
     const db = await pool.getConnection();
-    const query = "SELECT * FROM category_spesialis WHERE id = ?";
-    const [rows] = await db.execute(query, [category_spesialisId]);
+    const [rows] = await db.execute(
+      "SELECT * FROM category_spesialis WHERE id = ?",
+      [id]
+    );
     db.release();
 
     if (rows.length === 0) {
