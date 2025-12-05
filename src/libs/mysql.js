@@ -6,6 +6,8 @@ const pool = mysql.createPool({
   password: '',
   database: 'pelayanan-kesehatan-web',
   waitForConnections: true,
+    connectionLimit: 10,     
+  charset: 'utf8mb4',
 });
 
 export default pool;

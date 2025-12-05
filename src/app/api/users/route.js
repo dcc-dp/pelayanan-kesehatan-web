@@ -1,90 +1,157 @@
-import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: API untuk mengelola data pengguna (users)
+ */
 
-export async function GET() {
-  try {
-    const db = await pool.getConnection();
-    const query = "select * from users";
-    const [rows] = await db.execute(query);
-    db.release();
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Mendapatkan semua data pengguna
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Berhasil mengambil daftar pengguna
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Ranti"
+ *                   email:
+ *                     type: string
+ *                     example: "ranti@example.com"
+ *                   password:
+ *                     type: string
+ *                     example: "hashed_password"
+ *       500:
+ *         description: Terjadi kesalahan pada server
+ */
 
-    return NextResponse.json(rows);
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: error,
-      },
-      { status: 500 }
-    );
-  }
-}
+/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Menambahkan pengguna baru
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Ranti"
+ *               email:
+ *                 type: string
+ *                 example: "ranti@example.com"
+ *               password:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       201:
+ *         description: Pengguna berhasil ditambahkan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 10
+ *       500:
+ *         description: Terjadi kesalahan saat menambahkan pengguna
+ */
 
-export async function POST(request) {
-  try {
-    const data = await request.json();
-    const db = await pool.getConnection();
+/**
+ * @swagger
+ * /api/users:
+ *   put:
+ *     summary: Memperbarui data pengguna berdasarkan ID
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 1
+ *               name:
+ *                 type: string
+ *                 example: "Ranti Updated"
+ *               email:
+ *                 type: string
+ *                 example: "ranti_updated@example.com"
+ *               password:
+ *                 type: string
+ *                 example: "newpassword123"
+ *     responses:
+ *       200:
+ *         description: Pengguna berhasil diperbarui
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User updated successfully"
+ *       500:
+ *         description: Terjadi kesalahan saat memperbarui data pengguna
+ */
 
-    const query = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
-    const [result] = await db.execute(query, [
-      data.name,
-      data.email,
-      data.password,
-    ]);
-    db.release();
-
-    return NextResponse.json({ id: result.insertId }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request) {
-  try {
-    const data = await request.json();
-    const userId = data.id;
-    const db = await pool.getConnection();
-
-    const query =
-      "UPDATE users SET name = ?, password = ?, email = ? WHERE id = ?";
-    await db.execute(query, [data.name, data.password, data.email, userId]);
-    db.release();
-
-    return NextResponse.json({ message: "User updated successfully" });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: error.message,
-      },
-      { status: 500,
-        error: error.message
-       }
-    );
-  }
-}
-
-export async function DELETE(request) {
-
-  try {
-    const data = await request.json();
-    const db = await pool.getConnection();
-    const userId = data.id;
-
-    const query = "DELETE FROM users WHERE id = ?";
-    await db.execute(query, [userId]);
-    db.release();
-
-    return NextResponse.json({ message: "User deleted successfully" });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: error,
-      },
-      { status: 500 }
-    );
-  }
-}
+/**
+ * @swagger
+ * /api/users:
+ *   delete:
+ *     summary: Menghapus data pengguna berdasarkan ID
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 3
+ *     responses:
+ *       200:
+ *         description: Pengguna berhasil dihapus
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User deleted successfully"
+ *       500:
+ *         description: Terjadi kesalahan saat menghapus pengguna
+ */
