@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../details/components/addModal";
-import EditModal from "../details/components/editModal";
+import AddModal from "../drugs/components/addModal";
+import EditModal from "../drugs/components/editModal";
 
-const DataDetails = () => {
-  const [detailsData, setDetailsData] = useState([]);
+const DataDrugs = () => {
+  const [drugsData, setDrugsData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,13 +20,12 @@ const DataDetails = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/details");
+      const response = await fetch("/api/drugs");
 
       if (!response.ok) throw new Error("Gagal memuat data");
 
       const data = await response.json();
-      console.log("DATA DARI API:", data); // 🔥 TAMBAHKAN INI
-      setDetailsData(data);
+      setDrugsData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -43,16 +42,16 @@ const DataDetails = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/details`, {
+      const response = await fetch(`/api/drugs`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus detail");
+      if (!response.ok) throw new Error("Gagal menghapus konsultasi");
 
-      setDetailsData((prev) => prev.filter((item) => item.id !== id));
-      alert("detail berhasil dihapus!");
+      setDrugsData((prev) => prev.filter((item) => item.id !== id));
+      alert("obat berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
@@ -61,14 +60,14 @@ const DataDetails = () => {
 
   // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return detailsData;
+    if (!searchQuery) return drugsData;
 
-    return detailsData.filter((item) =>
+    return drugsData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [detailsData, searchQuery]);
+  }, [drugsData, searchQuery]);
 
   return (
     <div className="flex min-h-screen font-sans text-black">
@@ -78,7 +77,7 @@ const DataDetails = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar detail</span>
+            <span className="text-black">Daftar obat</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
@@ -99,7 +98,7 @@ const DataDetails = () => {
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-              Tambah detail
+              Tambah obat
             </button>
           </div>
         </div>
@@ -119,11 +118,9 @@ const DataDetails = () => {
                   {[
                     "No",
                     "ID",
-                    "nama pasien",
-                    "nama Dokter",
-                    "jumlah minum",
-                    "jumlah hari",
-                    "waktu minum",
+                    "name",
+                    "type",
+                    "price",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -144,11 +141,10 @@ const DataDetails = () => {
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
-                      <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
-                      <td className="px-6 py-4 text-sm">{item.jumlah_minum}</td>
-                      <td className="px-6 py-4 text-sm">{item.jumlah_hari}</td>
-                      <td className="px-6 py-4 text-sm">{item.waktu_minum}</td>
+
+                      <td className="px-6 py-4 text-sm">{item.name}</td>
+                      <td className="px-6 py-4 text-sm">{item.type}</td>
+                      <td className="px-6 py-4 text-sm">{item.price}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
@@ -185,10 +181,10 @@ const DataDetails = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data kategori.
+                      Tidak ada data obat.
                     </td>
                   </tr>
                 )}
@@ -216,4 +212,4 @@ const DataDetails = () => {
   );
 };
 
-export default DataDetails;
+export default DataDrugs;

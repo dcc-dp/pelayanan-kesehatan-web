@@ -52,8 +52,9 @@ import pool from "@/src/libs/mysql";
  *       500:
  *         description: Kesalahan server
  */
-export async function GET() {
+export async function GET(request, { params }) {
   try {
+    const recipes_id = params.id;
     const db = await pool.getConnection();
     const query = `
       SELECT 
@@ -72,9 +73,18 @@ export async function GET() {
       LEFT JOIN users pasien ON re.users_id = pasien.id
       LEFT JOIN doctor drs ON re.doctors_id = drs.id
       LEFT JOIN users dokter ON drs.users_id = dokter.id
+      WHERE d.recipes_id = ?
     `;
-    const [rows] = await db.execute(query);
+    const [rows] = await db.execute(query, [recipes_id]);
     db.release();
+
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { message: "Tidak ada data detail untuk ID resep ini" },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(rows);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

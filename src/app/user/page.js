@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../details/components/addModal";
-import EditModal from "../details/components/editModal";
+import AddModal from "../user/components/addModal";
+import EditModal from "../user/components/editModal";
 
-const DataDetails = () => {
-  const [detailsData, setDetailsData] = useState([]);
+const DataUser = () => {
+  const [userData, setUserData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,13 +20,12 @@ const DataDetails = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/details");
+      const response = await fetch("/api/users");
 
       if (!response.ok) throw new Error("Gagal memuat data");
 
       const data = await response.json();
-      console.log("DATA DARI API:", data); // 🔥 TAMBAHKAN INI
-      setDetailsData(data);
+      setUserData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -43,16 +42,16 @@ const DataDetails = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/details`, {
+      const response = await fetch(`/api/users`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus detail");
+      if (!response.ok) throw new Error("Gagal menghapus User");
 
-      setDetailsData((prev) => prev.filter((item) => item.id !== id));
-      alert("detail berhasil dihapus!");
+      setUserData((prev) => prev.filter((item) => item.id !== id));
+      alert("User berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
@@ -61,24 +60,24 @@ const DataDetails = () => {
 
   // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return detailsData;
+    if (!searchQuery) return userData;
 
-    return detailsData.filter((item) =>
+    return userData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [detailsData, searchQuery]);
+  }, [userData, searchQuery]);
 
   return (
-    <div className="flex min-h-screen font-sans text-black">
+    <div className="flex min-h-screen font-sans">
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar detail</span>
+            <span className="text-black">Daftar User</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
@@ -99,7 +98,7 @@ const DataDetails = () => {
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-              Tambah detail
+              Tambah User
             </button>
           </div>
         </div>
@@ -112,21 +111,24 @@ const DataDetails = () => {
         )}
 
         {!loading && !error && (
-          <div className="overflow-x-auto shadow-md rounded-lg">
+          <div className="overflow-x-auto shadow-md rounded-lg text-black">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-pink-300">
                 <tr>
                   {[
                     "No",
                     "ID",
-                    "nama pasien",
-                    "nama Dokter",
-                    "jumlah minum",
-                    "jumlah hari",
-                    "waktu minum",
-                    "Tgl Buat",
-                    "Tgl Ubah",
-                    "Aksi",
+                    "nama",
+                    "gender",
+                    "tgl lahir",
+                    "alamat",
+                    "Whatsapp",
+                    "email",
+                    "gambar",
+                    "Role",
+                    "tgl buat",
+                    "tgl buat",
+                    "aksi",
                   ].map((header, i) => (
                     <th
                       key={i}
@@ -144,11 +146,14 @@ const DataDetails = () => {
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
-                      <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
-                      <td className="px-6 py-4 text-sm">{item.jumlah_minum}</td>
-                      <td className="px-6 py-4 text-sm">{item.jumlah_hari}</td>
-                      <td className="px-6 py-4 text-sm">{item.waktu_minum}</td>
+                      <td className="px-6 py-4 text-sm">{item.name}</td>
+                      <td className="px-6 py-4 text-sm">{item.gender}</td>
+                      <td className="px-6 py-4 text-sm">{item.birth}</td>
+                      <td className="px-6 py-4 text-sm">{item.address}</td>
+                      <td className="px-6 py-4 text-sm">{item.whatsapp}</td>
+                      <td className="px-6 py-4 text-sm">{item.email}</td>
+                      <td className="px-6 py-4 text-sm">{item.image}</td>
+                      <td className="px-6 py-4 text-sm">{item.role}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
@@ -188,7 +193,7 @@ const DataDetails = () => {
                       colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data kategori.
+                      Tidak ada data resep.
                     </td>
                   </tr>
                 )}
@@ -216,4 +221,4 @@ const DataDetails = () => {
   );
 };
 
-export default DataDetails;
+export default DataUser;

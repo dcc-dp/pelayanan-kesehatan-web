@@ -70,7 +70,7 @@ const DataConsultations = () => {
   }, [consultationsData, searchQuery]);
 
   return (
-    <div className="flex min-h-screen font-sans">
+    <div className="flex min-h-screen font-sans text-black">
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
@@ -118,8 +118,8 @@ const DataConsultations = () => {
                   {[
                     "No",
                     "ID",
-                    "users_id",
-                    "doctors_id",
+                    "pasien",
+                    "Dokter",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -141,9 +141,9 @@ const DataConsultations = () => {
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
                       <td className="px-6 py-4 text-sm">
-                        {item.users_id}
+                        {item.pasien}
                       </td>
-                      <td className="px-6 py-4 text-sm">{item.doctors_id}</td>
+                      <td className="px-6 py-4 text-sm">{item.dokter}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at

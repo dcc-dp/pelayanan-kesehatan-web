@@ -3,14 +3,15 @@ import { useState } from "react";
 
 export default function AddModal({ open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    specialis_name: "",
-    description: "",
+    name: "",
+    type: "",
+    price: "",
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/api/category_spesialis", {
+    const res = await fetch("/api/drugs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -25,29 +26,40 @@ export default function AddModal({ open, onClose, onSuccess }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center tetxt-black">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Tambah Spesialis</h2>
+        <h2 className="text-xl font-bold mb-4">Tambah obat</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label>Nama Spesialis</label>
+            <label>Nama obat</label>
             <input
               className="border p-2 w-full rounded"
-              value={formData.specialis_name}
+              value={formData.name}
               onChange={(e) =>
-                setFormData({ ...formData, specialis_name: e.target.value })
+                setFormData({ ...formData, name: e.target.value })
               }
             />
           </div>
 
           <div>
-            <label>Deskripsi</label>
+            <label>type</label>
             <input
               className="border p-2 w-full rounded"
-              value={formData.description}
+              value={formData.type}
               onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+                setFormData({ ...formData, type: e.target.value })
+              }
+            />
+          </div>
+
+           <div>
+            <label>price</label>
+            <input
+              className="border p-2 w-full rounded"
+              value={formData.price}
+              onChange={(e) =>
+                setFormData({ ...formData, price: e.target.value })
               }
             />
           </div>

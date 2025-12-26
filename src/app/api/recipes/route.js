@@ -172,24 +172,30 @@ export async function GET() {
   try {
     const db = await pool.getConnection();
     const query = `
-      SELECT 
-        u1.name AS pasien,
-        u1.gender,
-        u1.email,
-        u1.birth AS tgl_lahir,
-        u1.address AS alamat,
-        u1.whatsapp AS nomor_wa,
-        u1.image AS foto,
-        u1.role AS role,
-        u2.name AS dokter,
-        d.description AS deskripsi,
-        d.license AS lisensi,
-        d.certificate AS sertifikat
-      FROM recipes c
-      INNER JOIN users u1 ON c.users_id = u1.id
-      INNER JOIN doctor d ON c.doctors_id = d.id
-      INNER JOIN users u2 ON d.users_id = u2.id
-    `;
+  SELECT 
+    c.id AS id,
+    c.users_id,
+    c.doctors_id,
+    c.created_at,
+    c.updated_at,
+    u1.name AS pasien,
+    u1.gender,
+    u1.email,
+    u1.birth AS tgl_lahir,
+    u1.address AS alamat,
+    u1.whatsapp AS nomor_wa,
+    u1.image AS foto,
+    u1.role AS role,
+    u2.name AS dokter,
+    d.description AS deskripsi,
+    d.license AS lisensi,
+    d.certificate AS sertifikat
+  FROM recipes c
+  INNER JOIN users u1 ON c.users_id = u1.id
+  INNER JOIN doctor d ON c.doctors_id = d.id
+  INNER JOIN users u2 ON d.users_id = u2.id
+`;
+
     const [rows] = await db.execute(query);
     db.release();
 

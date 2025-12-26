@@ -89,7 +89,7 @@ CREATE TABLE `details` (
 CREATE TABLE `doctor` (
   `id` int NOT NULL,
   `users_id` int NOT NULL,
-  `category` int DEFAULT NULL,
+  `category_spesialis_id` int DEFAULT NULL,
   `description` text NOT NULL,
   `license` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `certificate` text NOT NULL,
