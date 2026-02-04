@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../recipes/components/addModal";
-import EditModal from "../recipes/components/editModal";
+import AddModal from "../details/components/addModal";
+import EditModal from "../details/components/editModal";
 
-const DataRecipes = () => {
+const DataDetails = () => {
   const router = useRouter();
 
-  const [recipesData, setRecipesData] = useState([]);
+  const [detailsData, setDetailsData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,12 +24,12 @@ const DataRecipes = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/recipes");
+      const response = await fetch("/api/details");
 
       if (!response.ok) throw new Error("Gagal memuat data");
 
       const data = await response.json();
-      setRecipesData(data);
+      setDetailsData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -46,7 +46,7 @@ const DataRecipes = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch("/api/recipes", {
+      const response = await fetch("/api/details", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
@@ -54,7 +54,7 @@ const DataRecipes = () => {
 
       if (!response.ok) throw new Error("Gagal menghapus resep");
 
-      setRecipesData((prev) => prev.filter((item) => item.id !== id));
+      setDetailsData((prev) => prev.filter((item) => item.id !== id));
       alert("Resep berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
@@ -64,14 +64,14 @@ const DataRecipes = () => {
 
   // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return recipesData;
+    if (!searchQuery) return detailsData;
 
-    return recipesData.filter((item) =>
+    return detailsData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [recipesData, searchQuery]);
+  }, [detailsData, searchQuery]);
 
   return (
     <div className="flex min-h-screen font-sans">
@@ -103,7 +103,7 @@ const DataRecipes = () => {
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-              Tambah Resep
+              Tambah detail obat
             </button>
           </div>
         </div>
@@ -126,8 +126,12 @@ const DataRecipes = () => {
                   {[
                     "No",
                     "ID",
-                    "Pasien",
-                    "Dokter",
+                    "nama Pasien",
+                    "nama Dokter",
+                    "nama obat",
+                    "jumlah minum",
+                    "jumlah hari",
+                    "waktu minum",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -148,8 +152,12 @@ const DataRecipes = () => {
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4">{index + 1}</td>
                       <td className="px-6 py-4">{item.id}</td>
-                      <td className="px-6 py-4">{item.pasien}</td>
-                      <td className="px-6 py-4">{item.dokter}</td>
+                      <td className="px-6 py-4">{item.nm_pasien}</td>
+                      <td className="px-6 py-4">{item.nm_dokter}</td>
+                      <td className="px-6 py-4">{item.nama_obat}</td>
+                      <td className="px-6 py-4">{item.jumlah_minum}</td>
+                      <td className="px-6 py-4">{item.jumlah_hari}</td>
+                      <td className="px-6 py-4">{item.waktu_minum}</td>
                       <td className="px-6 py-4">
                         {item.created_at
                           ? new Date(item.created_at).toLocaleString()
@@ -197,7 +205,7 @@ const DataRecipes = () => {
                       colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data resep.
+                      Tidak ada data detail obat.
                     </td>
                   </tr>
                 )}
@@ -225,4 +233,4 @@ const DataRecipes = () => {
   );
 };
 
-export default DataRecipes;
+export default DataDetails;
