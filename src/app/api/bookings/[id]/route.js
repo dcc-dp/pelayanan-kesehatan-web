@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "../../../../../lib/mysql";
-
+import pool from "@/src/libs/mysql";
 
 /**
  * @swagger
@@ -46,32 +45,28 @@ import pool from "../../../../../lib/mysql";
  */
 
 export async function GET(request, { params }) {
-  const bookingsId = params.id; 
+  const bookingsId = params.id;
 
   try {
     const db = await pool.getConnection();
 
     const query = `
     SELECT 
-        pembeli.name AS nm_pembeli,
-        dokter.name AS nm_dokter,
-        b.total
+      pembeli.name AS nm_pembeli,
+      dokter.name AS nm_dokter,
+      b.total
       FROM bookings b
       INNER JOIN recipes r ON b.recipes_id = r.id
       INNER JOIN users pembeli ON r.users_id = pembeli.id
       INNER JOIN doctor dr ON r.doctors_id = dr.id
       INNER JOIN users dokter ON dr.users_id = dokter.id
       WHERE b.id = ?;
-    `;  
-    const [rows] = await db.execute(query, [bookings]);
+    `;
+    const [rows] = await db.execute(query, [bookingsId]);
     db.release();
 
     return NextResponse.json(rows);
   } catch (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

@@ -3,42 +3,42 @@ import { useState, useEffect } from "react";
 
 export default function EditModal({ open, onClose, onSuccess, id }) {
   const [formData, setFormData] = useState({
-    users_id: "",
-    doctors_id: "",
+    recipes_id: "",
+    drugs_id: "",
   });
 
-  const [users, setUsers] = useState([]);
-  const [doctors, setDoctors] = useState([]);
+  const [recipes, setRecipes] = useState([]);
+  const [drugs, setDrugs] = useState([]);
 
   useEffect(() => {
     if (open) {
-      fetchUsers();
-      fetchDoctors();
+      fetchRecipes();
+      fetchDrugs();
     }
   }, [open]);
 
-  const fetchUsers = async () => {
-    const res = await fetch("/api/users");
+  const fetchRecipes = async () => {
+    const res = await fetch("/api/recipes");
     const data = await res.json();
-    setUsers(data);
+    setRecipes(data);
   };
 
-  const fetchDoctors = async () => {
-    const res = await fetch("/api/doctor");
+  const fetchDrugs = async () => {
+    const res = await fetch("/api/drugs");
     const data = await res.json();
-    setDoctors(data);
+    setDrugs(data);
   };
 
   useEffect(() => {
     if (!id) return;
 
     async function fetchData() {
-      const res = await fetch(`/api/consultations/${id}`);
+      const res = await fetch(`/api/details/${id}`);
       const data = await res.json();
 
       setFormData({
-        users_id: data[0]?.users_id,
-        doctors_id: data[0]?.doctors_id,
+        recipes_id: data[0]?.recipes_id,
+        drugs_id: data[0]?.drugs_id,
       });
     }
     fetchData();
@@ -47,7 +47,7 @@ export default function EditModal({ open, onClose, onSuccess, id }) {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/api/consultations", {
+    const res = await fetch("/api/details", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...formData, id }),
@@ -64,40 +64,40 @@ export default function EditModal({ open, onClose, onSuccess, id }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Edit Konsultasi</h2>
+        <h2 className="text-xl font-bold mb-4">Edit detail</h2>
 
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
-            <label className="font-semibold">Pilih User</label>
+            <label className="font-semibold">Pilih recipes</label>
             <select
               className="border p-2 w-full rounded"
-              value={formData.users_id}
+              value={formData.recipes_id}
               onChange={(e) =>
-                setFormData({ ...formData, users_id: e.target.value })
+                setFormData({ ...formData, recipes_id: e.target.value })
               }
             >
-              <option value="">-- Pilih User --</option>
-              {users.map((u, index) => (
-                <option key={u.id || index} value={u.id}>
-                  {u.name}
+              <option value="">-- Pilih Resep --</option>
+              {recipes.map((r, index) => (
+                <option key={r.id || index} value={r.id}>
+                  {r.name}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="font-semibold">Pilih Dokter</label>
+            <label className="font-semibold">Pilih obat</label>
             <select
               className="border p-2 w-full rounded"
-              value={formData.doctors_id}
+              value={formData.drugs_id}
               onChange={(e) =>
-                setFormData({ ...formData, doctors_id: e.target.value })
+                setFormData({ ...formData, drugs_id: e.target.value })
               }
             >
-              <option value="">-- Pilih Dokter --</option>
-              {doctors.map((d, index) => (
-                <option key={d.id || index} value={d.id}>
-                  {d.name}
+              <option value="">-- Pilih obat --</option>
+              {drugs.map((o, index) => (
+                <option key={o.id || index} value={o.id}>
+                  {o.name}
                 </option>
               ))}
             </select>

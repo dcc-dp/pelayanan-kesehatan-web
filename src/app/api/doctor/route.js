@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import pool from "@/src/libs/mysql";
+
 /**
  * @swagger
  * tags:
@@ -154,9 +157,6 @@
  *         description: Terjadi kesalahan server
  */
 
-import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
-
 /**
  * @swagger
  * tags:
@@ -207,14 +207,17 @@ import pool from "@/src/libs/mysql";
 export async function GET() {
   try {
     const db = await pool.getConnection();
-    const query = `SELECT doctor.id,
-    users.name,
-    category_spesialis.specialis_name,
-    doctor.description,
-    doctor.license,
-    doctor.certificate from doctor 
-    INNER JOIN users on doctor.users_id = users.id 
-    INNER JOIN category_spesialis on doctor.category_spesialis_id = category_spesialis.id`;
+    const query = `SELECT 
+      doctor.id,
+      doctor.users_id,
+      doctor.category_spesialis_id,
+      users.name,
+      doctor.description,
+      doctor.license,
+      doctor.certificate
+    FROM doctor 
+    INNER JOIN users ON doctor.users_id = users.id
+    LEFT JOIN category_spesialis ON doctor.category_spesialis_id = category_spesialis.id`;
     const [rows] = await db.execute(query);
     db.release();
 

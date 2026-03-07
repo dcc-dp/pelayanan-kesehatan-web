@@ -3,37 +3,37 @@ import { useState, useEffect } from "react";
 
 export default function AddModal({ open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    users_id: "",
-    doctors_id: "",
+    recipes_id: "",
+    drugs_id: "",
   });
 
-  const [users, setUsers] = useState([]);
-  const [doctors, setDoctors] = useState([]);
+  const [recipes, setRecipes] = useState([]);
+  const [drugs, setDrugs] = useState([]);
 
   // Fetch data users & doctors ketika modal dibuka
   useEffect(() => {
     if (open) {
-      fetchUsers();
-      fetchDoctors();
+      fetchRecipes();
+      fetchDrugs();
     }
   }, [open]);
 
-  const fetchUsers = async () => {
-    const res = await fetch("/api/users");
+  const fetchRecipes = async () => {
+    const res = await fetch("/api/recipes");
     const data = await res.json();
-    setUsers(data);
+    setRecipes(data);
   };
 
-  const fetchDoctors = async () => {
-    const res = await fetch("/api/doctor");
+  const fetchDrugs = async () => {
+    const res = await fetch("/api/drugs");
     const data = await res.json();
-    setDoctors(data);
+    setDrugs(data);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
- const res = await fetch("/api/consultations", {
+    const res = await fetch("/api/details", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -50,24 +50,23 @@ export default function AddModal({ open, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Tambah Konsultasi</h2>
+        <h2 className="text-xl font-bold mb-4">Tambah detail</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Dropdown Users */}
           <div>
-            <label className="font-semibold">Pilih User</label>
+            <label className="font-semibold">Pilih resep</label>
             <select
               className="border p-2 w-full rounded"
-              value={formData.users_id}
+              value={formData.recipes_id}
               onChange={(e) =>
-                setFormData({ ...formData, users_id: e.target.value })
+                setFormData({ ...formData, recipes_id: e.target.value })
               }
             >
-              <option value="">-- Pilih User --</option>
+              <option value="">-- Pilih resep --</option>
               {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
+                <option key={r.id} value={r.id}>
+                  {r.name}
                 </option>
               ))}
             </select>
@@ -75,18 +74,18 @@ export default function AddModal({ open, onClose, onSuccess }) {
 
           {/* Dropdown Doctors */}
           <div>
-            <label className="font-semibold">Pilih Dokter</label>
+            <label className="font-semibold">Pilih obat</label>
             <select
               className="border p-2 w-full rounded"
-              value={formData.doctors_id}
+              value={formData.drugs_id}
               onChange={(e) =>
-                setFormData({ ...formData, doctors_id: e.target.value })
+                setFormData({ ...formData, drugs_id: e.target.value })
               }
             >
-              <option value="">-- Pilih Dokter --</option>
-              {doctors.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
+              <option value="">-- Pilih obat --</option>
+              {doctors.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
                 </option>
               ))}
             </select>

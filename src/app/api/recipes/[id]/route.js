@@ -100,6 +100,9 @@ export async function GET(request, { params }) {
 
     const query = `
       SELECT 
+        c.id,
+        c.users_id,
+        c.doctors_id,
         u1.name AS pasien,
         u1.gender,
         u1.email,

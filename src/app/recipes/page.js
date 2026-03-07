@@ -25,7 +25,7 @@ const DataRecipes = () => {
       if (!response.ok) throw new Error("Gagal memuat data");
 
       const data = await response.json();
-      setConsultationsData(data);
+      setRecipesData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -64,8 +64,8 @@ const DataRecipes = () => {
 
     return recipesData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [recipesData, searchQuery]);
 

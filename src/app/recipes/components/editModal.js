@@ -33,7 +33,7 @@ export default function EditModal({ open, onClose, onSuccess, id }) {
     if (!id) return;
 
     async function fetchData() {
-      const res = await fetch(`/api/consultations/${id}`);
+      const res = await fetch(`/api/recipes/${id}`);
       const data = await res.json();
 
       setFormData({
