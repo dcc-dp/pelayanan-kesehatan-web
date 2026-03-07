@@ -62,23 +62,27 @@ export async function GET() {
     const db = await pool.getConnection();
 
     const query = `
-      SELECT 
-        d.name AS obat, 
-        d.price AS harga,
-        dt.jumlah_minum, 
-        dt.jumlah_hari, 
-        dt.waktu_minum,
-        pembeli.name AS nm_pembeli,
-        dokter.name AS nm_dokter,
-        b.total
-      FROM bookings b
-      INNER JOIN recipes r ON b.recipes_id = r.id
-      INNER JOIN details dt ON dt.recipes_id = r.id
-      INNER JOIN drugs d ON dt.drugs_id = d.id
-      INNER JOIN users pembeli ON r.users_id = pembeli.id
-      INNER JOIN doctor dr ON r.doctors_id = dr.id
-      INNER JOIN users dokter ON dr.users_id = dokter.id
-    `;
+  SELECT 
+    b.id,
+    b.recipes_id,
+    b.total,
+    b.created_at,
+    b.updated_at,
+    d.name AS obat, 
+    d.price AS harga,
+    dt.jumlah_minum, 
+    dt.jumlah_hari, 
+    dt.waktu_minum,
+    pembeli.name AS nm_pembeli,
+    dokter.name AS nm_dokter
+  FROM bookings b
+  INNER JOIN recipes r ON b.recipes_id = r.id
+  INNER JOIN details dt ON dt.recipes_id = r.id
+  INNER JOIN drugs d ON dt.drugs_id = d.id
+  INNER JOIN users pembeli ON r.users_id = pembeli.id
+  INNER JOIN doctor dr ON r.doctors_id = dr.id
+  INNER JOIN users dokter ON dr.users_id = dokter.id
+`;
 
     const [rows] = await db.execute(query);
     db.release();
@@ -130,11 +134,13 @@ export async function POST(request) {
     const db = await pool.getConnection();
 
     const totalQuery = `
-      SELECT SUM(drugs.price * details.jumlah) AS total
+      SELECT 
+        SUM(drugs.price * details.jumlah_minum * details.jumlah_hari) AS total
       FROM details
       INNER JOIN drugs ON details.drugs_id = drugs.id
       WHERE details.recipes_id = ?
     `;
+
     const [rows] = await db.execute(totalQuery, [data.recipes_id]);
     const total = rows[0]?.total || 0;
 
@@ -142,6 +148,7 @@ export async function POST(request) {
       INSERT INTO bookings (recipes_id, total)
       VALUES (?, ?)
     `;
+
     const [result] = await db.execute(insertQuery, [data.recipes_id, total]);
 
     db.release();
@@ -190,7 +197,9 @@ export async function PUT(request) {
     const db = await pool.getConnection();
 
     const totalQuery = `
-      SELECT SUM(drugs.price * details.jumlah) AS total
+      SELECT 
+  SUM(drugs.price * details.jumlah_minum * details.jumlah_hari) AS total
+
       FROM details
       INNER JOIN drugs ON details.drugs_id = drugs.id
       WHERE details.recipes_id = ?

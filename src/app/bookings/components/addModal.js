@@ -1,23 +1,40 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AddModal({ open, onClose, onSuccess }) {
-  const [recipes, setRecipes] = useState([]);
   const [formData, setFormData] = useState({
     recipes_id: "",
+    user_id: "",
+    doctor_id: "",
+    description: "",
     total: "",
   });
 
-  // Load daftar resep untuk dropdown
-  const loadRecipes = async () => {
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() => {
+    if (open) {
+      fetchRecipes();
+    }
+  }, [open]);
+
+  const fetchRecipes = async () => {
     const res = await fetch("/api/recipes");
     const data = await res.json();
     setRecipes(data);
   };
 
-  useEffect(() => {
-    if (open) loadRecipes();
-  }, [open]);
+  const handleSelectRecipe = (id) => {
+    const selected = recipes.find((r) => r.id == id);
+
+    setFormData({
+      ...formData,
+      recipes_id: id,
+      user_id: selected.user_id,
+      doctor_id: selected.doctor_id,
+      description: selected.description,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,20 +59,18 @@ export default function AddModal({ open, onClose, onSuccess }) {
         <h2 className="text-xl font-bold mb-4">Tambah Booking</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Recipes */}
+          {/* Dropdown Recipes */}
           <div>
-            <label>Pilih Resep</label>
+            <label className="font-semibold">Pilih Resep</label>
             <select
               className="border p-2 w-full rounded"
               value={formData.recipes_id}
-              onChange={(e) =>
-                setFormData({ ...formData, recipes_id: e.target.value })
-              }
+              onChange={(e) => handleSelectRecipe(e.target.value)}
             >
-              <option value="">-- pilih resep --</option>
+              <option value="">-- Pilih Resep --</option>
               {recipes.map((r) => (
                 <option key={r.id} value={r.id}>
-                  Resep #{r.id} - {r.user_name} → {r.doctor_name}
+                  {r.user_name} - {r.doctor_name}
                 </option>
               ))}
             </select>
@@ -65,7 +80,6 @@ export default function AddModal({ open, onClose, onSuccess }) {
           <div>
             <label>Total</label>
             <input
-              type="number"
               className="border p-2 w-full rounded"
               value={formData.total}
               onChange={(e) =>

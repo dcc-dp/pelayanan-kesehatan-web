@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../bookings/components/addModal";
-import EditModal from "../bookings/components/editModal";
+import AddModal from "../detail/components/addModal";
+import EditModal from "../detail/components/editModal";
 
-const DataBookings = () => {
-  const [bookingsData, setBookingsData] = useState([]);
+const DataDetail = () => {
+  const [detailData, setDetailData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,12 +20,12 @@ const DataBookings = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/bookings");
+      const response = await fetch("/api/details");
 
-      if (!response.ok) throw new Error("Gagal memuat data");
+      if (!response.ok) throw new Error("Gagal memuat data detail");
 
       const data = await response.json();
-      setBookingsData(data);
+      setDetailData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -42,16 +42,16 @@ const DataBookings = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/bookings`, {
+      const response = await fetch(`/api/detail`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus booking");
+      if (!response.ok) throw new Error("Gagal menghapus konsultasi");
 
-      setBookingsData((prev) => prev.filter((item) => item.id !== id));
-      alert("Kategori berhasil dihapus!");
+      setDetailData((prev) => prev.filter((item) => item.id !== id));
+      alert("detail berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
@@ -60,14 +60,14 @@ const DataBookings = () => {
 
   // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return bookingsData;
+    if (!searchQuery) return detailData;
 
-    return bookingsData.filter((item) =>
+    return detailData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [bookingsData, searchQuery]);
+  }, [detailData, searchQuery]);
 
   return (
     <div className="flex min-h-screen font-sans">
@@ -77,7 +77,7 @@ const DataBookings = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar Bookings</span>
+            <span className="text-black">Daftar detail</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
@@ -98,7 +98,7 @@ const DataBookings = () => {
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-              Tambah Booking
+              Tambah detail
             </button>
           </div>
         </div>
@@ -118,9 +118,13 @@ const DataBookings = () => {
                   {[
                     "No",
                     "ID",
-                    "Nama Pasien",
-                    "Nama Dokter",
-                    "Total",
+                    "pasien",
+                    "dokter",
+                    "nama obat",
+                    "jumlah obat",
+                    "jumlah minum",
+                    "jumlah hari",
+                    "waktu minum",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -138,12 +142,18 @@ const DataBookings = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-gray-100">
+                    <tr
+                      key={item.id}
+                      className="hover:bg-gray-100 text-gray-800"
+                    >
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">{item.user_name}</td>
-                      <td className="px-6 py-4 text-sm">{item.doctor_name}</td>
-                      <td className="px-6 py-4 text-sm">{item.total}</td>
+                      <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
+                      <td className="px-6 py-4 text-sm">{item.nm_dokter}</td>
+                      <td className="px-6 py-4 text-sm">{item.nama_drug}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah_minum}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah_hari}</td>
+                      <td className="px-6 py-4 text-sm">{item.waktu_minum}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
@@ -183,7 +193,7 @@ const DataBookings = () => {
                       colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data Booking.
+                      Tidak ada data detail.
                     </td>
                   </tr>
                 )}
@@ -211,4 +221,4 @@ const DataBookings = () => {
   );
 };
 
-export default DataBookings;
+export default DataDetail;

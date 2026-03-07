@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../bookings/components/addModal";
-import EditModal from "../bookings/components/editModal";
+import AddModal from "../recipes/components/addModal";
+import EditModal from "../recipes/components/editModal";
 
-const DataBookings = () => {
-  const [bookingsData, setBookingsData] = useState([]);
+const DataRecipes = () => {
+  const [recipesData, setRecipesData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,16 +17,15 @@ const DataBookings = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  // 🔥 Fetch Data
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("./api/bookings");
+      const response = await fetch("/api/recipes");
 
-      if (!response.ok) throw new Error("Gagal memuat data bookings");
+      if (!response.ok) throw new Error("Gagal memuat data");
 
       const data = await response.json();
-      setBookingsData(data);
+      setConsultationsData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -38,56 +37,50 @@ const DataBookings = () => {
     loadData();
   }, []);
 
-  // ❌ Delete Booking
+  // 🔥 Hapus Data
   const handleDelete = async (id) => {
-    if (!confirm("Yakin ingin menghapus booking ini?")) return;
+    if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/bookings`, {
+      const response = await fetch(`/api/recipes`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus booking");
+      if (!response.ok) throw new Error("Gagal menghapus konsultasi");
 
-      // Hapus dari data frontend tanpa reload
-      setBookingsData((prev) => prev.filter((item) => item.id !== id));
-
-      alert("Booking berhasil dihapus!");
+      setConsultationsData((prev) => prev.filter((item) => item.id !== id));
+      alert("konsultasi berhasil dihapus!");
     } catch (error) {
-      alert("Terjadi kesalahan saat menghapus booking.");
+      alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
     }
   };
 
-  // 🔍 Search / Filtering
+  // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return bookingsData;
+    if (!searchQuery) return recipesData;
 
-    return bookingsData.filter((item) =>
+    return recipesData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val || "")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
+        String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [bookingsData, searchQuery]);
+  }, [recipesData, searchQuery]);
 
   return (
     <div className="flex min-h-screen font-sans">
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar Bookings</span>
+            <span className="text-black">Daftar Resep Obat</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
-            {/* Search Box */}
             <div className="flex items-center w-full border border-gray-300 rounded-md">
               <input
                 type="text"
@@ -101,27 +94,22 @@ const DataBookings = () => {
               </button>
             </div>
 
-            {/* Add Button */}
             <button
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-              Tambah Booking
+              Tambah Resep
             </button>
           </div>
         </div>
 
-        {/* Loading */}
         {loading && (
           <div className="text-center text-gray-600">Memuat data...</div>
         )}
-
-        {/* Error */}
         {error && (
           <div className="text-center text-red-600">Error: {error}</div>
         )}
 
-        {/* Table */}
         {!loading && !error && (
           <div className="overflow-x-auto shadow-md rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
@@ -130,8 +118,8 @@ const DataBookings = () => {
                   {[
                     "No",
                     "ID",
-                    "id resep",
-                    "Total",
+                    "users_id",
+                    "doctors_id",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -152,8 +140,8 @@ const DataBookings = () => {
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">{item.recipes_id}</td>
-                      <td className="px-6 py-4 text-sm">{item.total}</td>
+                      <td className="px-6 py-4 text-sm">{item.users_id}</td>
+                      <td className="px-6 py-4 text-sm">{item.doctors_id}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
@@ -190,10 +178,10 @@ const DataBookings = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data Booking.
+                      Tidak ada data Konsultasi.
                     </td>
                   </tr>
                 )}
@@ -221,4 +209,4 @@ const DataBookings = () => {
   );
 };
 
-export default DataBookings;
+export default DataRecipes;

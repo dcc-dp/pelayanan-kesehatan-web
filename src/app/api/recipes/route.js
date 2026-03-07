@@ -173,6 +173,7 @@ export async function GET() {
     const db = await pool.getConnection();
     const query = `
       SELECT 
+      c.id,
         u1.name AS pasien,
         u1.gender,
         u1.email,

@@ -207,7 +207,14 @@ import pool from "@/src/libs/mysql";
 export async function GET() {
   try {
     const db = await pool.getConnection();
-    const query = "SELECT * FROM doctor";
+    const query = `SELECT doctor.id,
+    users.name,
+    category_spesialis.specialis_name,
+    doctor.description,
+    doctor.license,
+    doctor.certificate from doctor 
+    INNER JOIN users on doctor.users_id = users.id 
+    INNER JOIN category_spesialis on doctor.category_spesialis_id = category_spesialis.id`;
     const [rows] = await db.execute(query);
     db.release();
 
