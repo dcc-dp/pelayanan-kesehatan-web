@@ -64,8 +64,8 @@ const DataCategorySpesialis = () => {
 
     return categorySpesialisData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [categorySpesialisData, searchQuery]);
 
@@ -134,7 +134,7 @@ const DataCategorySpesialis = () => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white text-black divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-100">

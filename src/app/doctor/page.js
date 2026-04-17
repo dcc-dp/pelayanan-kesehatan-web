@@ -64,8 +64,8 @@ const DataDoctor = () => {
 
     return doctorData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [doctorData, searchQuery]);
 
@@ -137,16 +137,16 @@ const DataDoctor = () => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white text-black divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
+                      <td className="px-6 py-4 text-sm">{item.name}</td>
                       <td className="px-6 py-4 text-sm">
-                        {item.users_id}
+                        {item.specialis_name}
                       </td>
-                      <td className="px-6 py-4 text-sm">{item.category}</td>
                       <td className="px-6 py-4 text-sm">{item.description}</td>
                       <td className="px-6 py-4 text-sm">{item.description}</td>
                       <td className="px-6 py-4 text-sm">{item.certificate}</td>

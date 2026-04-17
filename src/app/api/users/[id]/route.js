@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import pool from "@/src/libs/mysql";
+
 /**
  * @swagger
  * tags:
@@ -62,3 +65,24 @@
  *                   type: string
  *                   example: "Database connection failed"
  */
+
+export async function GET(request, { params }) {
+  const id = params.id;
+
+  try {
+    const db = await pool.getConnection();
+    const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [id]);
+    db.release();
+
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { error: "user tidak ditemukan" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json(rows[0]);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

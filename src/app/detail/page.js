@@ -64,8 +64,8 @@ const DataDetail = () => {
 
     return detailData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [detailData, searchQuery]);
 
@@ -139,7 +139,7 @@ const DataDetail = () => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white text-black divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
                     <tr
@@ -151,6 +151,7 @@ const DataDetail = () => {
                       <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
                       <td className="px-6 py-4 text-sm">{item.nm_dokter}</td>
                       <td className="px-6 py-4 text-sm">{item.nama_drug}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah}</td>
                       <td className="px-6 py-4 text-sm">{item.jumlah_minum}</td>
                       <td className="px-6 py-4 text-sm">{item.jumlah_hari}</td>
                       <td className="px-6 py-4 text-sm">{item.waktu_minum}</td>

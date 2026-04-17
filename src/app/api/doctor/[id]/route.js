@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import pool from "@/src/libs/mysql";
+
 /**
  * @swagger
  * tags:
@@ -75,18 +78,7 @@ export async function GET(request, { params }) {
   try {
     const db = await pool.getConnection();
 
-    const query = `
-    SELECT 
-      pembeli.name AS nm_pembeli,
-      dokter.name AS nm_dokter,
-      b.total
-      FROM bookings b
-      INNER JOIN recipes r ON b.recipes_id = r.id
-      INNER JOIN users pembeli ON r.users_id = pembeli.id
-      INNER JOIN doctor dr ON r.doctors_id = dr.id
-      INNER JOIN users dokter ON dr.users_id = dokter.id
-      WHERE b.id = ?;
-    `;
+    const query = `SELECT * FROM doctor WHERE id = ?;`;
     const [rows] = await db.execute(query, [bookingsId]);
     db.release();
 

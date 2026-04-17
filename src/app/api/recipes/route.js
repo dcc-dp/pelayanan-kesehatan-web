@@ -185,7 +185,9 @@ export async function GET() {
         u2.name AS dokter,
         d.description AS deskripsi,
         d.license AS lisensi,
-        d.certificate AS sertifikat
+        d.certificate AS sertifikat,
+        c.created_at,
+        c.updated_at
       FROM recipes c
       INNER JOIN users u1 ON c.users_id = u1.id
       INNER JOIN doctor d ON c.doctors_id = d.id

@@ -64,8 +64,8 @@ const DataConsultations = () => {
 
     return consultationsData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [consultationsData, searchQuery]);
 
@@ -118,8 +118,8 @@ const DataConsultations = () => {
                   {[
                     "No",
                     "ID",
-                    "users_id",
-                    "doctors_id",
+                    "nama pasien",
+                    "nama dokter",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -134,14 +134,14 @@ const DataConsultations = () => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white text-black divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">{item.users_id}</td>
-                      <td className="px-6 py-4 text-sm">{item.doctors_id}</td>
+                      <td className="px-6 py-4 text-sm">{item.pasien}</td>
+                      <td className="px-6 py-4 text-sm">{item.dokter}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at

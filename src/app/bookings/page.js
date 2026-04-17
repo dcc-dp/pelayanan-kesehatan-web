@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../bookings/components/addModal";
 import EditModal from "../bookings/components/editModal";
 
 const DataBookings = () => {
@@ -38,7 +37,6 @@ const DataBookings = () => {
     loadData();
   }, []);
 
-  // ❌ Delete Booking
   const handleDelete = async (id) => {
     if (!confirm("Yakin ingin menghapus booking ini?")) return;
 
@@ -69,8 +67,8 @@ const DataBookings = () => {
       Object.values(item).some((val) =>
         String(val || "")
           .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      )
+          .includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [bookingsData, searchQuery]);
 
@@ -100,14 +98,6 @@ const DataBookings = () => {
                 <FiSearch />
               </button>
             </div>
-
-            {/* Add Button */}
-            <button
-              onClick={() => setOpenAdd(true)}
-              className="bg-pink-300 text-white px-4 py-2 rounded"
-            >
-              Tambah Booking
-            </button>
           </div>
         </div>
 
@@ -132,6 +122,13 @@ const DataBookings = () => {
                     "ID",
                     "id resep",
                     "Total",
+                    "nama obat",
+                    "harga",
+                    "jumlah minum",
+                    "jumlah hari",
+                    "waktu minum",
+                    "nama pembeli",
+                    "nama dokter",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -146,14 +143,21 @@ const DataBookings = () => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white text-black divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">{item.recipes_id}</td>
+                      <td className="px-6 py-4 text-sm ">{item.recipes_id}</td>
                       <td className="px-6 py-4 text-sm">{item.total}</td>
+                      <td className="px-6 py-4 text-sm">{item.obat}</td>
+                      <td className="px-6 py-4 text-sm">{item.harga}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah_minum}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah_hari}</td>
+                      <td className="px-6 py-4 text-sm">{item.waktu_minum}</td>
+                      <td className="px-6 py-4 text-sm">{item.nm_pembeli}</td>
+                      <td className="px-6 py-4 text-sm">{item.nm_dokter}</td>
 
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
@@ -204,11 +208,6 @@ const DataBookings = () => {
       </main>
 
       {/* Modal Tambah */}
-      <AddModal
-        open={openAdd}
-        onClose={() => setOpenAdd(false)}
-        onSuccess={loadData}
-      />
 
       {/* Modal Edit */}
       <EditModal

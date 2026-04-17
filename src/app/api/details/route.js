@@ -64,7 +64,9 @@ export async function GET() {
         dr.name AS nama_drug,
         d.jumlah,
         pasien.name AS nm_pasien,
-        dokter.name AS nm_dokter
+        dokter.name AS nm_dokter,
+        d.created_at,
+        d.updated_at
       FROM details AS d
       INNER JOIN drugs AS dr ON d.drugs_id = dr.id
       INNER JOIN recipes AS re ON d.recipes_id = re.id

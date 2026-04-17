@@ -212,9 +212,12 @@ export async function GET() {
       doctor.users_id,
       doctor.category_spesialis_id,
       users.name,
+      category_spesialis.specialis_name,
       doctor.description,
       doctor.license,
-      doctor.certificate
+      doctor.certificate,
+      doctor.created_at,
+      doctor.updated_at
     FROM doctor 
     INNER JOIN users ON doctor.users_id = users.id
     LEFT JOIN category_spesialis ON doctor.category_spesialis_id = category_spesialis.id`;

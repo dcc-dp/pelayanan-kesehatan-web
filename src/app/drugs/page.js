@@ -64,8 +64,8 @@ const DataDrugs = () => {
 
     return drugsData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [drugsData, searchQuery]);
 
@@ -135,7 +135,7 @@ const DataDrugs = () => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y text-black">
+              <tbody className="bg-white text-black divide-y text-black">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-400">
