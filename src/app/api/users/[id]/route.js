@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -13,6 +13,7 @@ import pool from "@/src/libs/mysql";
  * /api/users/{id}:
  *   get:
  *     summary: Mendapatkan data pengguna berdasarkan ID
+ *     description: Mengambil satu data pengguna berdasarkan ID tanpa menampilkan password.
  *     tags: [Users]
  *     parameters:
  *       - name: id
@@ -28,22 +29,36 @@ import pool from "@/src/libs/mysql";
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   name:
- *                     type: string
- *                     example: "Ranti"
- *                   email:
- *                     type: string
- *                     example: "ranti@example.com"
- *                   password:
- *                     type: string
- *                     example: "hashed_password"
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                   example: 1
+ *                 name:
+ *                   type: string
+ *                   example: "Ranti"
+ *                 email:
+ *                   type: string
+ *                   example: "ranti@example.com"
+ *                 gender:
+ *                   type: string
+ *                   example: "perempuan"
+ *                 birth:
+ *                   type: string
+ *                   format: date
+ *                   example: "2000-01-01"
+ *                 address:
+ *                   type: string
+ *                   example: "Makassar"
+ *                 whatsapp:
+ *                   type: string
+ *                   example: "08123456789"
+ *                 image:
+ *                   type: string
+ *                   example: "/uploads/user.jpg"
+ *                 role:
+ *                   type: string
+ *                   example: "user"
  *       404:
  *         description: Pengguna tidak ditemukan
  *         content:
@@ -63,25 +78,33 @@ import pool from "@/src/libs/mysql";
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Database connection failed"
+ *                   example: "Internal server error"
  */
 
 export async function GET(request, { params }) {
-  const id = params.id;
-
   try {
-    const db = await pool.getConnection();
-    const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [id]);
-    db.release();
+    const id = parseInt(params.id);
 
-    if (rows.length === 0) {
-      return NextResponse.json(
-        { error: "user tidak ditemukan" },
-        { status: 404 },
-      );
+    const user = await prisma.users.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        gender: true,
+        birth: true,
+        address: true,
+        whatsapp: true,
+        image: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(rows[0]);
+    return NextResponse.json(user);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

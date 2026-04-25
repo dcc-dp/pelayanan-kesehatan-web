@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import pool from "../../../libs/mysql";
+import { prisma } from "../../../libs/prisma";
+import bcrypt from "bcryptjs";
 
 /**
  * @swagger
@@ -38,37 +39,30 @@ import pool from "../../../libs/mysql";
  *       500:
  *         description: Terjadi kesalahan server
  */
+
+export const runtime = 'nodejs' // 👈 required for Prisma
+
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    const { email, password } = await request.json();
 
-    const db = await pool.getConnection();
+    const user = await prisma.users.findFirst({
+      where: { email },
+    });
 
-    const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [
-      email,
-    ]);
-
-    db.release();
-
-    // cek user ada atau tidak
-    if (rows.length === 0) {
+    if (!user) {
       return NextResponse.json(
         { message: "Email tidak ditemukan" },
         { status: 401 },
       );
     }
 
-    const user = rows[0];
-
-    // cek password (pakai bcrypt)
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return NextResponse.json({ message: "Password salah" }, { status: 401 });
     }
 
-    // hapus password dari response
     delete user.password;
 
     return NextResponse.json({

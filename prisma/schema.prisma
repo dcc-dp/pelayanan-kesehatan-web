@@ -1,13 +1,150 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+  generator client {
+    provider = "prisma-client-js"
+  }
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
+  datasource db {
+    provider = "mysql"
+  }
 
-generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-}
+  model bookings {
+    id         Int      @id @default(autoincrement())
+    recipes_id Int      @unique(map: "recipes_id")
+    total      Int?
+    created_at DateTime @default(now()) @db.Timestamp(0)
+    updated_at DateTime @default(now()) @db.Timestamp(0)
+    recipes    recipes  @relation(fields: [recipes_id], references: [id], onDelete: Cascade, map: "recipes_fk")
+  }
 
-datasource db {
-  provider = "postgresql"
-}
+  model category_spesialis {
+    id             Int      @id @default(autoincrement())
+    specialis_name String   @db.VarChar(50)
+    description    String   @db.Text
+    created_at     DateTime @default(now()) @db.Timestamp(0)
+    updated_at     DateTime @default(now()) @db.Timestamp(0)
+    doctor         doctor[]
+  }
+
+  model consultations {
+    id         Int      @id @default(autoincrement())
+    users_id   Int
+    doctors_id Int
+    created_at DateTime @default(now()) @db.Timestamp(0)
+    updated_at DateTime @default(now()) @db.Timestamp(0)
+    doctor     doctor   @relation(fields: [doctors_id], references: [id], onDelete: Cascade, map: "doctors_fk")
+    users      users    @relation(fields: [users_id], references: [id], onDelete: Cascade, map: "users_fk")
+
+    @@index([doctors_id], map: "doctors_fk")
+    @@index([users_id], map: "users_fk")
+  }
+
+  model details {
+    id           Int                 @id @default(autoincrement())
+    recipes_id   Int
+    drugs_id     Int
+    jumlah       Int
+    jumlah_minum Int
+    jumlah_hari  Int
+    waktu_minum  details_waktu_minum
+    created_at   DateTime            @default(now()) @db.Timestamp(0)
+    updated_at   DateTime            @default(now()) @db.Timestamp(0)
+    drugs        drugs               @relation(fields: [drugs_id], references: [id], onDelete: Cascade, map: "drugs_fk")
+    recipes      recipes             @relation(fields: [recipes_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "resep_fk")
+
+    @@index([drugs_id], map: "drugs_fk")
+    @@index([recipes_id], map: "resep_fk")
+  }
+
+  model doctor {
+    id                    Int                 @id @default(autoincrement())
+    users_id              Int
+    category_spesialis_id Int?
+    description           String              @db.Text
+    license               String              @db.Text
+    certificate           String              @db.Text
+    created_at            DateTime            @default(now()) @db.Timestamp(0)
+    updated_at            DateTime            @default(now()) @db.Timestamp(0)
+    consultations         consultations[]
+    category_spesialis    category_spesialis? @relation(fields: [category_spesialis_id], references: [id], onDelete: Cascade, map: "category_spesialis_fk")
+    users                 users               @relation(fields: [users_id], references: [id], onDelete: Cascade, map: "user_fk")
+    recipes               recipes[]
+    schedules             schedules[]
+
+    @@index([category_spesialis_id], map: "category_spesialis_fk")
+    @@index([users_id], map: "user_fk")
+  }
+
+  model drugs {
+    id         Int       @id @default(autoincrement())
+    name       String    @db.VarChar(100)
+    type       String    @db.Text
+    price      Int
+    created_at DateTime  @default(now()) @db.Timestamp(0)
+    updated_at DateTime  @default(now()) @db.Timestamp(0)
+    details    details[]
+  }
+
+  model recipes {
+    id         Int       @id @default(autoincrement())
+    users_id   Int
+    doctors_id Int
+    created_at DateTime  @default(now()) @db.Timestamp(0)
+    updated_at DateTime  @default(now()) @db.Timestamp(0)
+    bookings   bookings?
+    details    details[]
+    doctor     doctor    @relation(fields: [doctors_id], references: [id], onDelete: Cascade, map: "dokter_fk")
+    users      users     @relation(fields: [users_id], references: [id], onDelete: Cascade, map: "users")
+
+    @@index([doctors_id], map: "dokter_fk")
+    @@index([users_id], map: "users")
+  }
+
+  model schedules {
+    id         Int              @id @default(autoincrement())
+    users_id   Int
+    doctors_id Int
+    date       DateTime         @db.Date
+    time       DateTime         @db.Time(0)
+    status     schedules_status
+    created_at DateTime         @default(now()) @db.Timestamp(0)
+    updated_at DateTime         @default(now()) @db.Timestamp(0)
+    doctor     doctor           @relation(fields: [doctors_id], references: [id], onDelete: Cascade, map: "doctorss_fk")
+    users      users            @relation(fields: [users_id], references: [id], onDelete: Cascade, map: "usersss_fk")
+
+    @@index([doctors_id], map: "doctorss_fk")
+    @@index([users_id], map: "usersss_fk")
+  }
+
+  model users {
+    id            Int             @id @default(autoincrement())
+    name          String          @db.VarChar(100)
+    gender        users_gender?
+    birth         DateTime?       @db.Date
+    address       String?         @db.Text
+    whatsapp      String?         @db.VarChar(13)
+    password      String          @db.VarChar(255)
+    email         String          @db.VarChar(100)
+    image         String?         @db.Text
+    role          String          @default("user") @db.VarChar(50)
+    created_at    DateTime        @default(now()) @db.Timestamp(0)
+    updated_at    DateTime        @default(now()) @db.Timestamp(0)
+    consultations consultations[]
+    doctor        doctor[]
+    recipes       recipes[]
+    schedules     schedules[]
+  }
+
+  enum users_gender {
+    perempuan
+    laki_laki @map("laki-laki")
+  }
+
+  enum schedules_status {
+    proses
+    tolak
+    terima
+  }
+
+  enum details_waktu_minum {
+    before_eat
+    after_eat
+  }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -28,64 +28,67 @@ import pool from "@/src/libs/mysql";
  *                 properties:
  *                   id:
  *                     type: integer
- *                     example: 12
  *                   jumlah_minum:
  *                     type: string
- *                     example: "2 tablet"
  *                   jumlah_hari:
  *                     type: string
- *                     example: "5 hari"
  *                   waktu_minum:
  *                     type: string
- *                     example: "Setiap pagi dan malam"
  *                   nama_drug:
  *                     type: string
- *                     example: "Amoxicillin"
  *                   nm_pasien:
  *                     type: string
- *                     example: "John Doe"
  *                   nm_dokter:
  *                     type: string
- *                     example: "Dr. Sarah"
  *       404:
  *         description: Data tidak ditemukan untuk ID tersebut
  *       500:
  *         description: Terjadi kesalahan pada server
  */
 export async function GET(request, { params }) {
-  const details = params.id; // user_id dari path parameter
+  const userId = parseInt(params.id);
 
   try {
-    const db = await pool.getConnection();
+    const data = await prisma.details.findMany({
+      where: {
+        recipes: {
+          users_id: userId, // filter berdasarkan pasien
+        },
+      },
+      include: {
+        drugs: true,
+        recipes: {
+          include: {
+            users: true, // pasien
+            doctor: {
+              include: {
+                users: true, // dokter
+              },
+            },
+          },
+        },
+      },
+    });
 
-    const query = `
-      SELECT 
-        d.id,
-        d.jumlah_minum,
-        d.jumlah_hari,
-        d.waktu_minum,
-        dr.name AS nama_drug,
-        pasien.name AS nm_pasien,
-        dokter.name AS nm_dokter
-      FROM details AS d
-      INNER JOIN drugs AS dr ON d.drugs_id = dr.id
-      INNER JOIN recipes AS re ON d.recipes_id = re.id
-      INNER JOIN users pasien ON re.users_id = pasien.id
-      INNER JOIN doctor drs ON re.doctors_id = drs.id
-      INNER JOIN users dokter ON drs.users_id = dokter.id
-      WHERE re.users_id = ?
-    `;
-    const [rows] = await db.execute(query, [details]);
-    db.release();
-
-    if (rows.length === 0) {
+    if (data.length === 0) {
       return NextResponse.json(
         { message: "Tidak ada data detail untuk ID pasien ini" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    return NextResponse.json(rows);
+    // 🔁 format seperti SQL lama
+    const result = data.map((d) => ({
+      id: d.id,
+      jumlah_minum: d.jumlah_minum,
+      jumlah_hari: d.jumlah_hari,
+      waktu_minum: d.waktu_minum,
+      nama_drug: d.drugs.name,
+      nm_pasien: d.recipes.users.name,
+      nm_dokter: d.recipes.doctor.users.name,
+    }));
+
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

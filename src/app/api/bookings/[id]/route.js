@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -22,50 +22,53 @@ import pool from "@/src/libs/mysql";
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   nm_pembeli:
- *                     type: string
- *                     example: "John Doe"
- *                     description: Nama pasien atau pembeli resep.
- *                   nm_dokter:
- *                     type: string
- *                     example: "Dr. Sarah Amelia"
- *                     description: Nama dokter yang menangani pasien.
- *                   total:
- *                     type: number
- *                     example: 250000
- *                     description: Total biaya resep yang dibayar.
+ *               type: object
+ *               properties:
+ *                 nm_pembeli:
+ *                   type: string
+ *                   example: "John Doe"
+ *                 nm_dokter:
+ *                   type: string
+ *                   example: "Dr. Sarah Amelia"
+ *                 total:
+ *                   type: number
+ *                   example: 250000
  *       404:
  *         description: Data booking tidak ditemukan.
  *       500:
  *         description: Terjadi kesalahan pada server.
  */
-
 export async function GET(request, { params }) {
-  const bookingsId = params.id;
+  const bookingsId = parseInt(params.id);
 
   try {
-    const db = await pool.getConnection();
+    const booking = await prisma.bookings.findUnique({
+      where: { id: bookingsId },
+      include: {
+        recipes: {
+          include: {
+            users: true, // pembeli
+            doctor: {
+              include: {
+                users: true, // dokter
+              },
+            },
+          },
+        },
+      },
+    });
 
-    const query = `
-    SELECT 
-      pembeli.name AS nm_pembeli,
-      dokter.name AS nm_dokter,
-      b.total
-      FROM bookings b
-      INNER JOIN recipes r ON b.recipes_id = r.id
-      INNER JOIN users pembeli ON r.users_id = pembeli.id
-      INNER JOIN doctor dr ON r.doctors_id = dr.id
-      INNER JOIN users dokter ON dr.users_id = dokter.id
-      WHERE b.id = ?;
-    `;
-    const [rows] = await db.execute(query, [bookingsId]);
-    db.release();
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+    }
 
-    return NextResponse.json(rows);
+    const result = {
+      nm_pembeli: booking.recipes.users.name,
+      nm_dokter: booking.recipes.doctor.users.name,
+      total: booking.total,
+    };
+
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

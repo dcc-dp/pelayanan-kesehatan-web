@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
-import pool from "../../../libs/mysql";
+import { prisma } from "../../../libs/prisma";
+import bcrypt from "bcryptjs";
 
 /**
  * @swagger
  * tags:
  *   name: Auth
- *   description: API untuk autentikasi (login)
+ *   description: API untuk autentikasi
  */
 
 /**
  * @swagger
  * /api/register:
  *   post:
- *     summary: Register pengguna
+ *     summary: Register pengguna baru
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -21,94 +22,133 @@ import pool from "../../../libs/mysql";
  *           schema:
  *             type: object
  *             required:
+ *               - name
  *               - email
  *               - password
+ *               - confirmPassword
  *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Budi Santoso"
  *               email:
  *                 type: string
- *                 example: "ranti@example.com"
+ *                 example: "budi@example.com"
  *               password:
  *                 type: string
- *                 example: "123456"
- *               ConfirmPassword:
+ *                 example: "password123"
+ *               confirmPassword:
  *                 type: string
- *                 example: "123456"
+ *                 example: "password123"
  *     responses:
- *       200:
- *         description: Akun berhasil dibuat
- *       401:
- *         description: Email atau password salah
+ *       201:
+ *         description: Register berhasil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Register berhasil"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     name:
+ *                       type: string
+ *                       example: "Budi Santoso"
+ *                     email:
+ *                       type: string
+ *                       example: "budi@example.com"
+ *                     role:
+ *                       type: string
+ *                       example: "pasien"
+ *       400:
+ *         description: Validasi gagal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Semua field wajib diisi"
  *       500:
  *         description: Terjadi kesalahan server
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Terjadi kesalahan"
+ *                 error:
+ *                   type: string
  */
 
 export async function POST(request) {
-  let db;
-
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, email, password, confirmPassword } = body;
 
-    // 🔎 Validasi input
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       return NextResponse.json(
         { message: "Semua field wajib diisi" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    if (password.length < 6) {
+    if (password !== confirmPassword) {
       return NextResponse.json(
-        { message: "Password minimal 6 karakter" },
-        { status: 400 },
+        { message: "Password tidak sama" },
+        { status: 400 }
       );
     }
 
-    // koneksi DB
-    db = await pool.getConnection();
+    const existingUser = await prisma.users.findFirst({
+      where: { email },
+    });
 
-    // 🔎 Cek email sudah ada atau belum
-    const [existingUser] = await db.execute(
-      "SELECT id FROM users WHERE email = ?",
-      [email],
-    );
-
-    if (existingUser.length > 0) {
+    if (existingUser) {
       return NextResponse.json(
         { message: "Email sudah terdaftar" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    // 🔐 Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 💾 Simpan ke database
-    const [result] = await db.execute(
-      "INSERT INTO users ( email, password) VALUES ( ?, ?)",
-      [email, hashedPassword],
-    );
-
-    // 📦 Ambil user yang baru dibuat (tanpa password)
-    const [newUser] = await db.execute(
-      "SELECT id, name, email FROM users WHERE id = ?",
-      [result.insertId],
-    );
+    const newUser = await prisma.users.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role: "pasien",
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
 
     return NextResponse.json(
       {
         message: "Register berhasil",
-        user: newUser[0],
+        user: newUser,
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     return NextResponse.json(
       { message: "Terjadi kesalahan", error: error.message },
-      { status: 500 },
+      { status: 500 }
     );
-  } finally {
-    // 🔄 pastikan koneksi ditutup
-    if (db) db.release();
   }
 }

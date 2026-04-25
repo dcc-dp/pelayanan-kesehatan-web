@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -26,62 +26,24 @@ import pool from "@/src/libs/mysql";
  *     responses:
  *       200:
  *         description: Data obat berhasil diambil
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   name:
- *                     type: string
- *                     example: "Paracetamol"
- *                   type:
- *                     type: string
- *                     example: "Tablet"
- *                   price:
- *                     type: number
- *                     example: 15000
  *       404:
  *         description: Data obat tidak ditemukan
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Drugs not found"
  *       500:
  *         description: Terjadi kesalahan pada server
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Database connection failed"
  */
-
 export async function GET(request, { params }) {
-  const drugsId = params.id; // ID obat dari path parameter
-
   try {
-    const db = await pool.getConnection();
-    const query = "SELECT * FROM drugs WHERE id = ?";
-    const [rows] = await db.execute(query, [drugsId]);
-    db.release();
+    const id = parseInt(params.id); // penting!
 
-    // Jika data tidak ditemukan
-    if (rows.length === 0) {
+    const drug = await prisma.drugs.findUnique({
+      where: { id },
+    });
+
+    if (!drug) {
       return NextResponse.json({ message: "Drugs not found" }, { status: 404 });
     }
 
-    return NextResponse.json(rows[0]); // kirim objek tunggal
+    return NextResponse.json(drug);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

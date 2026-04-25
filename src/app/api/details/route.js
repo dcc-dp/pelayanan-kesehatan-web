@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -27,56 +27,59 @@ import pool from "@/src/libs/mysql";
  *                 properties:
  *                   id:
  *                     type: integer
- *                     example: 5
  *                   jumlah_minum:
  *                     type: integer
- *                     example: 2
  *                   jumlah_hari:
  *                     type: integer
- *                     example: 7
  *                   waktu_minum:
  *                     type: string
- *                     example: "after_eat"
  *                   nama_drug:
  *                     type: string
- *                     example: "Paracetamol"
  *                   jumlah:
  *                     type: integer
- *                     example: 14
  *                   nm_pasien:
  *                     type: string
- *                     example: "Budi Santoso"
  *                   nm_dokter:
  *                     type: string
- *                     example: "Dr. Siti Aminah"
+ *                   created_at:
+ *                     type: string
+ *                   updated_at:
+ *                     type: string
  *       500:
  *         description: Kesalahan server
  */
 export async function GET() {
   try {
-    const db = await pool.getConnection();
-    const query = `
-      SELECT 
-        d.id,
-        d.jumlah_minum,
-        d.jumlah_hari,
-        d.waktu_minum,
-        dr.name AS nama_drug,
-        d.jumlah,
-        pasien.name AS nm_pasien,
-        dokter.name AS nm_dokter,
-        d.created_at,
-        d.updated_at
-      FROM details AS d
-      INNER JOIN drugs AS dr ON d.drugs_id = dr.id
-      INNER JOIN recipes AS re ON d.recipes_id = re.id
-      INNER JOIN users pasien ON re.users_id = pasien.id
-      INNER JOIN doctor drs ON re.doctors_id = drs.id
-      INNER JOIN users dokter ON drs.users_id = dokter.id
-    `;
-    const [rows] = await db.execute(query);
-    db.release();
-    return NextResponse.json(rows);
+    const data = await prisma.details.findMany({
+      include: {
+        drugs: true,
+        recipes: {
+          include: {
+            users: true,
+            doctor: {
+              include: {
+                users: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const result = data.map((d) => ({
+      id: d.id,
+      jumlah_minum: d.jumlah_minum,
+      jumlah_hari: d.jumlah_hari,
+      waktu_minum: d.waktu_minum,
+      nama_drug: d.drugs.name,
+      jumlah: d.jumlah,
+      nm_pasien: d.recipes.users.name,
+      nm_dokter: d.recipes.doctor.users.name,
+      created_at: d.created_at,
+      updated_at: d.updated_at,
+    }));
+
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -105,22 +108,16 @@ export async function GET() {
  *             properties:
  *               recipes_id:
  *                 type: integer
- *                 example: 2
  *               drugs_id:
  *                 type: integer
- *                 example: 4
  *               jumlah:
  *                 type: integer
- *                 example: 10
  *               jumlah_minum:
  *                 type: integer
- *                 example: 2
  *               jumlah_hari:
  *                 type: integer
- *                 example: 5
  *               waktu_minum:
  *                 type: string
- *                 example: "before_eat"
  *     responses:
  *       201:
  *         description: Data berhasil ditambahkan
@@ -131,28 +128,51 @@ export async function GET() {
  *               properties:
  *                 id:
  *                   type: integer
- *                   example: 12
+ *       400:
+ *         description: Request tidak valid
+ *       404:
+ *         description: Relasi tidak ditemukan
  *       500:
  *         description: Kesalahan server
  */
 export async function POST(request) {
   try {
     const data = await request.json();
-    const db = await pool.getConnection();
 
-    const query =
-      "INSERT INTO details (recipes_id, drugs_id, jumlah, jumlah_minum, jumlah_hari, waktu_minum) VALUES (?, ?, ?, ?, ?, ?)";
-    const [result] = await db.execute(query, [
-      data.recipes_id,
-      data.drugs_id,
-      data.jumlah,
-      data.jumlah_minum,
-      data.jumlah_hari,
-      data.waktu_minum,
-    ]);
-    db.release();
+    const drug = await prisma.drugs.findUnique({
+      where: { id: data.drugs_id },
+    });
 
-    return NextResponse.json({ id: result.insertId }, { status: 201 });
+    if (!drug) {
+      return NextResponse.json(
+        { error: `Drug tidak ditemukan` },
+        { status: 404 },
+      );
+    }
+
+    const recipe = await prisma.recipes.findUnique({
+      where: { id: data.recipes_id },
+    });
+
+    if (!recipe) {
+      return NextResponse.json(
+        { error: `Recipe tidak ditemukan` },
+        { status: 404 },
+      );
+    }
+
+    const newData = await prisma.details.create({
+      data: {
+        jumlah: data.jumlah,
+        jumlah_minum: data.jumlah_minum,
+        jumlah_hari: data.jumlah_hari,
+        waktu_minum: data.waktu_minum,
+        recipes: { connect: { id: data.recipes_id } },
+        drugs: { connect: { id: data.drugs_id } },
+      },
+    });
+
+    return NextResponse.json({ id: newData.id }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -173,68 +193,55 @@ export async function POST(request) {
  *             type: object
  *             required:
  *               - id
- *               - recipes_id
- *               - drugs_id
- *               - jumlah
- *               - jumlah_minum
- *               - jumlah_hari
- *               - waktu_minum
  *             properties:
  *               id:
  *                 type: integer
- *                 example: 5
  *               recipes_id:
  *                 type: integer
- *                 example: 2
  *               drugs_id:
  *                 type: integer
- *                 example: 4
  *               jumlah:
  *                 type: integer
- *                 example: 8
  *               jumlah_minum:
  *                 type: integer
- *                 example: 3
  *               jumlah_hari:
  *                 type: integer
- *                 example: 7
  *               waktu_minum:
  *                 type: string
- *                 example: "after_eat"
  *     responses:
  *       200:
  *         description: Data berhasil diperbarui
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: details updated successfully
+ *       404:
+ *         description: Data tidak ditemukan
  *       500:
  *         description: Kesalahan server
  */
 export async function PUT(request) {
   try {
     const data = await request.json();
-    const detailsId = data.id;
-    const db = await pool.getConnection();
 
-    const query =
-      "UPDATE details SET recipes_id = ?, drugs_id = ?, jumlah = ?, jumlah_minum = ?, jumlah_hari = ?, waktu_minum = ? WHERE id = ?";
-    await db.execute(query, [
-      data.recipes_id,
-      data.drugs_id,
-      data.jumlah,
-      data.jumlah_minum,
-      data.jumlah_hari,
-      data.waktu_minum,
-      detailsId,
-    ]);
-    db.release();
+    const updated = await prisma.details.updateMany({
+      where: { id: data.id },
+      data: {
+        jumlah: data.jumlah,
+        jumlah_minum: data.jumlah_minum,
+        jumlah_hari: data.jumlah_hari,
+        waktu_minum: data.waktu_minum,
+        recipes_id: data.recipes_id,
+        drugs_id: data.drugs_id,
+      },
+    });
 
-    return NextResponse.json({ message: "details updated successfully" });
+    if (updated.count === 0) {
+      return NextResponse.json(
+        { error: "Data tidak ditemukan" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({
+      message: "details updated successfully",
+    });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -258,31 +265,32 @@ export async function PUT(request) {
  *             properties:
  *               id:
  *                 type: integer
- *                 example: 5
  *     responses:
  *       200:
  *         description: Data berhasil dihapus
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: details deleted successfully
+ *       404:
+ *         description: Data tidak ditemukan
  *       500:
  *         description: Kesalahan server
  */
 export async function DELETE(request) {
   try {
-    const db = await pool.getConnection();
     const data = await request.json();
-    const detailsId = data.id;
-    const query = "DELETE FROM details WHERE id = ?";
-    await db.execute(query, [detailsId]);
-    db.release();
 
-    return NextResponse.json({ message: "details deleted successfully" });
+    const deleted = await prisma.details.deleteMany({
+      where: { id: data.id },
+    });
+
+    if (deleted.count === 0) {
+      return NextResponse.json(
+        { error: "Data tidak ditemukan" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({
+      message: "details deleted successfully",
+    });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/src/libs/prisma";
+
 /**
  * @swagger
  * tags:
@@ -10,10 +13,11 @@
  * /api/schedules:
  *   get:
  *     summary: Menampilkan semua data jadwal konsultasi
+ *     description: Mengambil seluruh data jadwal konsultasi beserta informasi pasien dan dokter.
  *     tags: [Schedules]
  *     responses:
  *       200:
- *         description: Daftar semua jadwal konsultasi berhasil ditampilkan
+ *         description: Berhasil mengambil data jadwal
  *         content:
  *           application/json:
  *             schema:
@@ -23,28 +27,54 @@
  *                 properties:
  *                   id:
  *                     type: integer
- *                     example: 1
  *                   date:
  *                     type: string
  *                     format: date
- *                     example: 2025-10-24
  *                   time:
  *                     type: string
- *                     example: "10:00"
  *                   status:
  *                     type: string
- *                     example: "confirmed"
  *                   nama_pasien:
  *                     type: string
- *                     example: "Ranti"
- *                   doctor_id:
- *                     type: integer
- *                     example: 3
+ *                   nama_dokter:
+ *                     type: string
  *       500:
- *         description: Terjadi kesalahan pada server
- *
+ *         description: Terjadi kesalahan server
+ */
+export async function GET() {
+  try {
+    const data = await prisma.schedules.findMany({
+      include: {
+        users: true,
+        doctor: {
+          include: {
+            users: true,
+          },
+        },
+      },
+    });
+
+    const result = data.map((item) => ({
+      id: item.id,
+      date: item.date,
+      time: item.time,
+      status: item.status,
+      nama_pasien: item.user?.name,
+      nama_dokter: item.doctor?.user?.name,
+    }));
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * @swagger
+ * /api/schedules:
  *   post:
  *     summary: Menambahkan jadwal konsultasi baru
+ *     description: Menyimpan jadwal konsultasi baru antara pasien dan dokter.
  *     tags: [Schedules]
  *     requestBody:
  *       required: true
@@ -61,36 +91,49 @@
  *             properties:
  *               users_id:
  *                 type: integer
- *                 example: 1
  *               doctors_id:
  *                 type: integer
- *                 example: 3
  *               date:
  *                 type: string
  *                 format: date
- *                 example: "2025-10-24"
  *               time:
  *                 type: string
- *                 example: "10:30"
  *               status:
  *                 type: string
- *                 example: "pending"
  *     responses:
  *       201:
  *         description: Jadwal berhasil ditambahkan
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 12
+ *       400:
+ *         description: Data tidak valid / foreign key tidak ditemukan
  *       500:
- *         description: Terjadi kesalahan pada server
- *
+ *         description: Terjadi kesalahan server
+ */
+export async function POST(request) {
+  try {
+    const data = await request.json();
+
+    const newData = await prisma.schedules.create({
+      data: {
+        users_id: data.users_id,
+        doctors_id: data.doctors_id,
+        date: data.date,
+        time: data.time,
+        status: data.status,
+      },
+    });
+
+    return NextResponse.json({ id: newData.id }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+}
+
+/**
+ * @swagger
+ * /api/schedules:
  *   put:
- *     summary: Mengubah data jadwal konsultasi
+ *     summary: Memperbarui jadwal konsultasi
+ *     description: Mengupdate jadwal konsultasi berdasarkan ID dengan data terbaru.
  *     tags: [Schedules]
  *     requestBody:
  *       required: true
@@ -117,13 +160,17 @@
  *                 example: 4
  *               date:
  *                 type: string
- *                 example: "2025-11-01"
+ *                 format: date
+ *                 example: "2026-04-25"
+ *                 description: Format tanggal (YYYY-MM-DD)
  *               time:
  *                 type: string
- *                 example: "09:00"
+ *                 example: "10:30:00"
+ *                 description: Format waktu (HH:mm:ss)
  *               status:
  *                 type: string
- *                 example: "completed"
+ *                 enum: [proses, tolak, terima]
+ *                 example: "proses"
  *     responses:
  *       200:
  *         description: Jadwal berhasil diperbarui
@@ -134,12 +181,58 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: schedules updated successfully
+ *                   example: "schedules updated successfully"
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Data tidak lengkap / tidak valid
+ *       404:
+ *         description: Data tidak ditemukan
  *       500:
- *         description: Terjadi kesalahan pada server
- *
+ *         description: Terjadi kesalahan server
+ */
+export async function PUT(request) {
+  try {
+    const data = await request.json();
+
+    // validasi sederhana
+    if (!data.id) {
+      return NextResponse.json({ error: "ID wajib diisi" }, { status: 400 });
+    }
+
+    const updated = await prisma.schedules.update({
+      where: { id: data.id },
+      data: {
+        users_id: data.users_id,
+        doctors_id: data.doctors_id,
+        date: new Date(data.date), // ✅ FIX
+        time: new Date(`1970-01-01T${data.time}`), // ✅ FIX
+        status: data.status,
+      },
+    });
+
+    return NextResponse.json({
+      message: "schedules updated successfully",
+      data: updated,
+    });
+  } catch (error) {
+    if (error.code === "P2025") {
+      return NextResponse.json(
+        { error: "Data tidak ditemukan" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+/**
+ * @swagger
+ * /api/schedules:
  *   delete:
- *     summary: Menghapus jadwal konsultasi berdasarkan ID
+ *     summary: Menghapus jadwal konsultasi
+ *     description: Menghapus data jadwal berdasarkan ID.
  *     tags: [Schedules]
  *     requestBody:
  *       required: true
@@ -152,18 +245,26 @@
  *             properties:
  *               id:
  *                 type: integer
- *                 example: 5
  *     responses:
  *       200:
  *         description: Jadwal berhasil dihapus
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: schedules deleted successfully
+ *       404:
+ *         description: Data tidak ditemukan
  *       500:
- *         description: Terjadi kesalahan pada server
+ *         description: Terjadi kesalahan server
  */
+export async function DELETE(request) {
+  try {
+    const data = await request.json();
+
+    await prisma.schedules.delete({
+      where: { id: data.id },
+    });
+
+    return NextResponse.json({
+      message: "schedules deleted successfully",
+    });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -18,33 +18,13 @@ import pool from "@/src/libs/mysql";
  *     responses:
  *       200:
  *         description: Data kategori spesialis berhasil diambil
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   specialis_name:
- *                     type: string
- *                     example: "Psikologi"
- *                   description:
- *                     type: string
- *                     example: "Spesialis kesehatan mental dan perilaku"
  *       500:
  *         description: Terjadi kesalahan pada server
  */
 export async function GET() {
   try {
-    const db = await pool.getConnection();
-    const query = "SELECT * FROM category_spesialis";
-    const [rows] = await db.execute(query);
-    db.release();
-
-    return NextResponse.json(rows);
+    const data = await prisma.category_spesialis.findMany();
+    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -88,20 +68,18 @@ export async function POST(request) {
     if (!data.specialis_name || !data.description) {
       return NextResponse.json(
         { error: "specialis_name dan description wajib diisi" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const db = await pool.getConnection();
-    const query =
-      "INSERT INTO category_spesialis (specialis_name, description) VALUES (?, ?)";
-    const [result] = await db.execute(query, [
-      data.specialis_name,
-      data.description,
-    ]);
-    db.release();
+    const newData = await prisma.category_spesialis.create({
+      data: {
+        specialis_name: data.specialis_name,
+        description: data.description,
+      },
+    });
 
-    return NextResponse.json({ id: result.insertId }, { status: 201 });
+    return NextResponse.json({ id: newData.id }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -133,39 +111,38 @@ export async function POST(request) {
  *                 example: "Kardiologi"
  *               description:
  *                 type: string
- *                 example: "Spesialis penyakit jantung dan pembuluh darah"
+ *                 example: "Spesialis penyakit jantung"
  *     responses:
  *       200:
- *         description: Data kategori spesialis berhasil diperbarui
+ *         description: Data berhasil diperbarui
  *       404:
  *         description: Data tidak ditemukan
  *       500:
- *         description: Terjadi kesalahan pada server
+ *         description: Terjadi kesalahan server
  */
 export async function PUT(request) {
   try {
     const data = await request.json();
+
     if (!data.id || !data.specialis_name || !data.description) {
       return NextResponse.json(
         { error: "id, specialis_name, dan description wajib diisi" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const db = await pool.getConnection();
-    const query =
-      "UPDATE category_spesialis SET specialis_name = ?, description = ? WHERE id = ?";
-    const [result] = await db.execute(query, [
-      data.specialis_name,
-      data.description,
-      data.id,
-    ]);
-    db.release();
+    const updated = await prisma.category_spesialis.updateMany({
+      where: { id: data.id },
+      data: {
+        specialis_name: data.specialis_name,
+        description: data.description,
+      },
+    });
 
-    if (result.affectedRows === 0) {
+    if (updated.count === 0) {
       return NextResponse.json(
         { error: "Data tidak ditemukan" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -198,28 +175,28 @@ export async function PUT(request) {
  *                 example: 3
  *     responses:
  *       200:
- *         description: Data kategori spesialis berhasil dihapus
+ *         description: Data berhasil dihapus
  *       404:
  *         description: Data tidak ditemukan
  *       500:
- *         description: Terjadi kesalahan pada server
+ *         description: Terjadi kesalahan server
  */
 export async function DELETE(request) {
   try {
     const data = await request.json();
+
     if (!data.id) {
       return NextResponse.json({ error: "id wajib diisi" }, { status: 400 });
     }
 
-    const db = await pool.getConnection();
-    const query = "DELETE FROM category_spesialis WHERE id = ?";
-    const [result] = await db.execute(query, [data.id]);
-    db.release();
+    const deleted = await prisma.category_spesialis.deleteMany({
+      where: { id: data.id },
+    });
 
-    if (result.affectedRows === 0) {
+    if (deleted.count === 0) {
       return NextResponse.json(
         { error: "Data tidak ditemukan" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 

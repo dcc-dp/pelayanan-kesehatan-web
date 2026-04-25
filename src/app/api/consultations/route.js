@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -18,83 +18,42 @@ import pool from "@/src/libs/mysql";
  *     responses:
  *       200:
  *         description: Data konsultasi berhasil diambil
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   pasien:
- *                     type: string
- *                     example: "Andi Pratama"
- *                   gender:
- *                     type: string
- *                     example: "Laki-laki"
- *                   email:
- *                     type: string
- *                     example: "andi@gmail.com"
- *                   tgl_lahir:
- *                     type: string
- *                     example: "1998-07-14"
- *                   alamat:
- *                     type: string
- *                     example: "Jl. Melati No. 23"
- *                   nomor_wa:
- *                     type: string
- *                     example: "+628123456789"
- *                   foto:
- *                     type: string
- *                     example: "https://example.com/foto.jpg"
- *                   role:
- *                     type: string
- *                     example: "user"
- *                   dokter:
- *                     type: string
- *                     example: "Dr. Budi Santoso"
- *                   deskripsi:
- *                     type: string
- *                     example: "Spesialis Penyakit Dalam"
- *                   lisensi:
- *                     type: string
- *                     example: "MED-12345"
- *                   sertifikat:
- *                     type: string
- *                     example: "https://example.com/sertifikat.pdf"
  *       500:
  *         description: Terjadi kesalahan pada server
  */
 export async function GET() {
   try {
-    const db = await pool.getConnection();
-    const query = `
-      SELECT 
-        c.id,
-        u1.name AS pasien,
-        u1.gender,
-        u1.email,
-        u1.birth as tgl_lahir,
-        u1.address as alamat,
-        u1.whatsapp as nomor_wa,
-        u1.image as foto,
-        u1.role as role,
-        u2.name AS dokter,
-        d.description AS deskripsi,
-        d.license AS lisensi,
-        d.certificate AS sertifikat,
-        c.created_at,
-        c.updated_at
-      FROM consultations c
-      INNER JOIN users u1 ON c.users_id = u1.id
-      INNER JOIN doctor d ON c.doctors_id = d.id
-      INNER JOIN users u2 ON d.users_id = u2.id
-    `;
-    const [rows] = await db.execute(query);
-    db.release();
-    return NextResponse.json(rows);
+    const data = await prisma.consultations.findMany({
+      include: {
+        users: true, // pasien
+        doctor: {
+          include: {
+            users: true, // user dokter
+          },
+        },
+      },
+    });
+
+    // 🔁 format ulang seperti hasil SQL kamu
+    const result = data.map((c) => ({
+      id: c.id,
+      pasien: c.users.name,
+      gender: c.users.gender,
+      email: c.users.email,
+      tgl_lahir: c.users.birth,
+      alamat: c.users.address,
+      nomor_wa: c.users.whatsapp,
+      foto: c.users.image,
+      role: c.users.role,
+      dokter: c.doctor.users.name,
+      deskripsi: c.doctor.description,
+      lisensi: c.doctor.license,
+      sertifikat: c.doctor.certificate,
+      created_at: c.created_at,
+      updated_at: c.updated_at,
+    }));
+
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -126,14 +85,6 @@ export async function GET() {
  *     responses:
  *       201:
  *         description: Konsultasi berhasil ditambahkan
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 5
  *       400:
  *         description: Permintaan tidak valid
  *       500:
@@ -142,14 +93,26 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const db = await pool.getConnection();
 
-    const query =
-      "INSERT INTO consultations(users_id, doctors_id) VALUES (?, ?)";
-    const [result] = await db.execute(query, [data.users_id, data.doctors_id]);
-    db.release();
+    if (!data.users_id || !data.doctors_id) {
+      return NextResponse.json(
+        { error: "users_id dan doctors_id wajib diisi" },
+        { status: 400 },
+      );
+    }
 
-    return NextResponse.json({ id: result.insertId }, { status: 201 });
+    const newData = await prisma.consultations.create({
+      data: {
+        users: {
+          connect: { id: data.users_id },
+        },
+        doctor: {
+          connect: { id: data.doctors_id },
+        },
+      },
+    });
+
+    return NextResponse.json({ id: newData.id }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -185,14 +148,6 @@ export async function POST(request) {
  *     responses:
  *       200:
  *         description: Data konsultasi berhasil diperbarui
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "consultations updated successfully"
  *       404:
  *         description: Data tidak ditemukan
  *       500:
@@ -201,13 +156,28 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const data = await request.json();
-    const consultationsId = data.id;
-    const db = await pool.getConnection();
 
-    const query =
-      "UPDATE consultations SET users_id = ?, doctors_id = ? WHERE id = ?";
-    await db.execute(query, [data.users_id, data.doctors_id, consultationsId]);
-    db.release();
+    if (!data.id || !data.users_id || !data.doctors_id) {
+      return NextResponse.json(
+        { error: "id, users_id, dan doctors_id wajib diisi" },
+        { status: 400 },
+      );
+    }
+
+    const updated = await prisma.consultations.updateMany({
+      where: { id: data.id },
+      data: {
+        users_id: data.users_id,
+        doctors_id: data.doctors_id,
+      },
+    });
+
+    if (updated.count === 0) {
+      return NextResponse.json(
+        { error: "Data tidak ditemukan" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json({
       message: "consultations updated successfully",
@@ -239,14 +209,6 @@ export async function PUT(request) {
  *     responses:
  *       200:
  *         description: Data konsultasi berhasil dihapus
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "consultations deleted successfully"
  *       404:
  *         description: Data tidak ditemukan
  *       500:
@@ -254,12 +216,22 @@ export async function PUT(request) {
  */
 export async function DELETE(request) {
   try {
-    const db = await pool.getConnection();
     const data = await request.json();
-    const consultationsId = data.id;
-    const query = "DELETE FROM consultations WHERE id = ?";
-    await db.execute(query, [consultationsId]);
-    db.release();
+
+    if (!data.id) {
+      return NextResponse.json({ error: "id wajib diisi" }, { status: 400 });
+    }
+
+    const deleted = await prisma.consultations.deleteMany({
+      where: { id: data.id },
+    });
+
+    if (deleted.count === 0) {
+      return NextResponse.json(
+        { error: "Data tidak ditemukan" },
+        { status: 404 },
+      );
+    }
 
     return NextResponse.json({
       message: "consultations deleted successfully",
