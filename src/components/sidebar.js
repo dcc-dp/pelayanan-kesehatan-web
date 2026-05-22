@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   FaBars,
@@ -11,102 +12,120 @@ import {
   FaClipboardList,
   FaFileMedical,
 } from "react-icons/fa";
+
 import { FiLogOut } from "react-icons/fi";
 import { signOut } from "next-auth/react";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = usePathname();
 
-  const MenuItem = ({ icon, label, collapsed, url }) => (
-    <div className="flex items-center space-x-4 text-white hover:text-pink-300 cursor-pointer">
-      <span className="text-lg">{icon}</span>
-      {!collapsed && (
-        <Link href={url}>
-          <span className="text-sm">{label}</span>
-        </Link>
-      )}
-    </div>
-  );
+  const menuItems = [
+    {
+      icon: <FaHome />,
+      label: "Dashboard",
+      url: "/admin",
+    },
+    {
+      icon: <FaUserFriends />,
+      label: "Data Pasien",
+      url: "/admin/patients",
+    },
+    {
+      icon: <FaUserMd />,
+      label: "Data Dokter",
+      url: "/admin/doctors",
+    },
+    {
+      icon: <FaCalendarAlt />,
+      label: "Jadwal Dokter",
+      url: "/admin/schedule",
+    },
+    {
+      icon: <FaClipboardList />,
+      label: "Bookings",
+      url: "/admin/bookings",
+    },
+    {
+      icon: <FaFileMedical />,
+      label: "Rekam Medis",
+      url: "/admin/records",
+    },
+  ];
 
   return (
     <aside
       className={`${
         collapsed ? "w-20" : "w-64"
-      } bg-[#1a1313] text-white flex flex-col transition-all duration-300`}
+      } min-h-screen bg-gradient-to-b from-blue-600 to-blue-800 text-white flex flex-col transition-all duration-300 shadow-xl`}
     >
-      
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700 text-pink-300">
-        <div
-          className={`text-xl italic font-semibold ${
-            collapsed ? "hidden" : "block"
-          }`}
-        >
-          Pelayanan Kesehatan Web
-        </div>
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-5 py-5 border-b border-blue-400">
+        {!collapsed && (
+          <div>
+            <h1 className="text-2xl font-bold">MediCare</h1>
+            <p className="text-xs text-blue-100">
+              Hospital Management
+            </p>
+          </div>
+        )}
+
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-white text-xl focus:outline-none"
+          className="text-xl hover:text-gray-200 transition"
         >
           <FaBars />
         </button>
       </div>
 
-      {/* Menu Navigasi */}
-      <nav className="flex-1 mt-6 space-y-6 px-4">
-        <MenuItem
-          icon={<FaHome />}
-          label="Dashboard"
-          collapsed={collapsed}
-          url="/admin"
-        />
+      {/* MENU */}
+      <nav className="flex-1 px-3 py-6 space-y-2">
+        {menuItems.map((item, index) => {
+          const active = pathname === item.url;
 
-        <MenuItem
-          icon={<FaUserFriends />}
-          label="Data Pasien"
-          collapsed={collapsed}
-          url="/admin/patients"
-        />
+          return (
+            <Link key={index} href={item.url}>
+              <div
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200
+                  
+                  ${
+                    active
+                      ? "bg-blue-900 shadow-lg"
+                      : "hover:bg-blue-700"
+                  }
+                `}
+              >
+                <span className="text-lg">{item.icon}</span>
 
-        <MenuItem
-          icon={<FaUserMd />}
-          label="Data Dokter"
-          collapsed={collapsed}
-          url="/admin/doctors"
-        />
-
-        <MenuItem
-          icon={<FaCalendarAlt />}
-          label="Jadwal Dokter"
-          collapsed={collapsed}
-          url="/admin/schedule"
-        />
-
-        <MenuItem
-          icon={<FaClipboardList />}
-          label="Daftar Booking"
-          collapsed={collapsed}
-          url="/admin/bookings"
-        />
-
-        <MenuItem
-          icon={<FaFileMedical />}
-          label="Rekam Medis / Resep"
-          collapsed={collapsed}
-          url="/admin/records"
-        />
-
-       
-        <div className="mt-auto">
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex items-center gap-4 text-white hover:text-pink-300"
-          >
-            <FiLogOut /> {!collapsed && "Logout"}
-          </button>
-        </div>
+                {!collapsed && (
+                  <span className="text-sm font-medium">
+                    {item.label}
+                  </span>
+                )}
+              </div>
+            </Link>
+          );
+        })}
       </nav>
+
+      {/* LOGOUT */}
+      <div className="p-4 border-t border-blue-400">
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex items-center gap-4 w-full px-4 py-3 rounded-xl hover:bg-red-500 transition"
+        >
+          <FiLogOut className="text-lg" />
+
+          {!collapsed && (
+            <span className="text-sm font-medium">
+              Logout
+            </span>
+          )}
+        </button>
+      </div>
     </aside>
   );
 };
 
 export default Sidebar;
+
