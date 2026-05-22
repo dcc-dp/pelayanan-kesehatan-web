@@ -69,7 +69,7 @@ export async function POST(request) {
     delete user.password;
 
     return NextResponse.json({
-      success: true,
+      success: true, 
       message: "Login berhasil",
       user,
     });
