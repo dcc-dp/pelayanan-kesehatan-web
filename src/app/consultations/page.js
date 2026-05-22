@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
-import { FaClipboardList, FaPlusSquare } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
+import AddModal from "../consultations/components/addModal";
+import EditModal from "../consultations/components/editModal";
 
 const DataConsultations = () => {
   const [consultationsData, setConsultationsData] = useState([]);
@@ -12,50 +13,52 @@ const DataConsultations = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function fetchConsultations() {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/consultations");
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editId, setEditId] = useState(null);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("consultations dari API:", data);
-        setConsultationsData(data);
-      } catch (error) {
-        console.error("Error fetching consultations:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchConsultations();
-  }, []);
-
-  const handleDelete = async (id) => {
-    if (!confirm("Yakin ingin menghapus consultations ini?")) return;
-
+  const loadData = async () => {
     try {
-      const response = await fetch(`/api/consultations/${id}`, {
-        method: "DELETE",
-      });
+      setLoading(true);
+      const response = await fetch("/api/consultations");
 
-      if (!response.ok) {
-        throw new Error("Gagal menghapus consultations");
-      }
+      if (!response.ok) throw new Error("Gagal memuat data");
 
-      setConsultationsData((prev) => prev.filter((item) => item.id !== id));
-      alert("consultations berhasil dihapus!");
+      const data = await response.json();
+      setConsultationsData(data);
     } catch (error) {
-      console.error("Gagal menghapus consultations:", error);
-      alert("Terjadi kesalahan saat menghapus consultations.");
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // 🔥 Hapus Data
+  const handleDelete = async (id) => {
+    if (!confirm("Yakin ingin menghapus data ini?")) return;
+
+    try {
+      const response = await fetch(`/api/consultations`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) throw new Error("Gagal menghapus konsultasi");
+
+      setConsultationsData((prev) => prev.filter((item) => item.id !== id));
+      alert("konsultasi berhasil dihapus!");
+    } catch (error) {
+      alert("Terjadi kesalahan saat menghapus.");
+      console.error(error);
+    }
+  };
+
+  // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
     if (!searchQuery) return consultationsData;
 
@@ -67,21 +70,21 @@ const DataConsultations = () => {
   }, [consultationsData, searchQuery]);
 
   return (
-    <div className="flex min-h-screen font-sans">
+    <div className="flex min-h-screen font-sans text-black">
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar consultations</span>
+            <span className="text-black">Daftar konsultasi</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
             <div className="flex items-center w-full border border-gray-300 rounded-md">
               <input
                 type="text"
-                placeholder="Search for..."
+                placeholder="Search..."
                 className="px-4 py-1 rounded-l-md focus:outline-none text-black w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -91,19 +94,18 @@ const DataConsultations = () => {
               </button>
             </div>
 
-            <Link href="/tambah-consultations">
-              <button className="flex items-center bg-pink-300 hover:bg-pink-200 text-white px-3 py-2 rounded-md whitespace-nowrap">
-                <FaPlusSquare className="mr-2" />
-                Tambah
-              </button>
-            </Link>
+            <button
+              onClick={() => setOpenAdd(true)}
+              className="bg-pink-300 text-white px-4 py-2 rounded"
+            >
+              Tambah konsultasi
+            </button>
           </div>
         </div>
 
         {loading && (
           <div className="text-center text-gray-600">Memuat data...</div>
         )}
-
         {error && (
           <div className="text-center text-red-600">Error: {error}</div>
         )}
@@ -116,8 +118,8 @@ const DataConsultations = () => {
                   {[
                     "No",
                     "ID",
-                    "users_id",
-                    "doctors_id",
+                    "pasien",
+                    "Dokter",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -138,29 +140,37 @@ const DataConsultations = () => {
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">{item.users_id}</td>
-                      <td className="px-6 py-4 text-sm">{item.doctors_id}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.pasien}
+                      </td>
+                      <td className="px-6 py-4 text-sm">{item.dokter}</td>
+
                       <td className="px-6 py-4 text-sm">
                         {item.created_at
-                          ? new Date(item.created_at).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.updated_at
-                          ? new Date(item.updated_at).toLocaleDateString()
+                          ? new Date(item.created_at).toLocaleString()
                           : "-"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        <Link href={`/consultations/edit/${item.id}`}>
-                          <button className="bg-blue-400 hover:bg-blue-300 text-white px-5 py-1 rounded-md text-sm">
-                            Edit
-                          </button>
-                        </Link>
+                        {item.updated_at
+                          ? new Date(item.updated_at).toLocaleString()
+                          : "-"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm flex gap-2">
+                        <button
+                          onClick={() => {
+                            setEditId(item.id);
+                            setOpenEdit(true);
+                          }}
+                          className="bg-blue-500 text-white px-3 py-1 rounded"
+                        >
+                          Edit
+                        </button>
 
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="bg-red-500 hover:bg-red-400 text-white px-3 py-1 mt-2 rounded-md text-sm"
+                          className="bg-red-500 text-white px-3 py-1 rounded"
                         >
                           Hapus
                         </button>
@@ -173,7 +183,7 @@ const DataConsultations = () => {
                       colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada consultations ditemukan.
+                      Tidak ada data kategori.
                     </td>
                   </tr>
                 )}
@@ -182,6 +192,21 @@ const DataConsultations = () => {
           </div>
         )}
       </main>
+
+      {/* Modal Tambah */}
+      <AddModal
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        onSuccess={loadData}
+      />
+
+      {/* Modal Edit */}
+      <EditModal
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        id={editId}
+        onSuccess={loadData}
+      />
     </div>
   );
 };

@@ -93,6 +93,8 @@ export async function GET(request, { params }) {
     const query = `
       SELECT 
         c.id,
+        c.users_id,
+        c.doctors_id,
         u1.name AS pasien,
         u1.gender,
         u1.email,
@@ -124,9 +126,6 @@ export async function GET(request, { params }) {
 
     return NextResponse.json(rows);
   } catch (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

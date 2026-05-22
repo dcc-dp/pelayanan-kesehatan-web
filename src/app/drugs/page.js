@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../category-spesialis/components/addModal";
-import EditModal from "../category-spesialis/components/editModal";
+import AddModal from "../drugs/components/addModal";
+import EditModal from "../drugs/components/editModal";
 
-const DataCategorySpesialis = () => {
-  const [categorySpesialisData, setCategorySpesialisData] = useState([]);
+const DataDrugs = () => {
+  const [drugsData, setDrugsData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,12 +20,12 @@ const DataCategorySpesialis = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/category_spesialis");
+      const response = await fetch("/api/drugs");
 
       if (!response.ok) throw new Error("Gagal memuat data");
 
       const data = await response.json();
-      setCategorySpesialisData(data);
+      setDrugsData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -42,16 +42,16 @@ const DataCategorySpesialis = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/category_spesialis`, {
+      const response = await fetch(`/api/drugs`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus kategori");
+      if (!response.ok) throw new Error("Gagal menghapus konsultasi");
 
-      setCategorySpesialisData((prev) => prev.filter((item) => item.id !== id));
-      alert("Kategori berhasil dihapus!");
+      setDrugsData((prev) => prev.filter((item) => item.id !== id));
+      alert("obat berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
@@ -60,24 +60,24 @@ const DataCategorySpesialis = () => {
 
   // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return categorySpesialisData;
+    if (!searchQuery) return drugsData;
 
-    return categorySpesialisData.filter((item) =>
+    return drugsData.filter((item) =>
       Object.values(item).some((val) =>
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [categorySpesialisData, searchQuery]);
+  }, [drugsData, searchQuery]);
 
   return (
-    <div className="flex min-h-screen font-sans">
+    <div className="flex min-h-screen font-sans text-black">
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-            <span className="text-black">Daftar Category Spesialis</span>
+            <span className="text-black">Daftar obat</span>
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
@@ -98,7 +98,7 @@ const DataCategorySpesialis = () => {
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-              Tambah Spesialis
+              Tambah obat
             </button>
           </div>
         </div>
@@ -118,8 +118,9 @@ const DataCategorySpesialis = () => {
                   {[
                     "No",
                     "ID",
-                    "specialis_name",
-                    "description",
+                    "name",
+                    "type",
+                    "price",
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -137,15 +138,15 @@ const DataCategorySpesialis = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-gray-100 text-black">
+                    <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.specialis_name}
-                      </td>
-                      <td className="px-6 py-4 text-sm">{item.description}</td>
 
-                       <td className="px-6 py-4 text-sm">
+                      <td className="px-6 py-4 text-sm">{item.name}</td>
+                      <td className="px-6 py-4 text-sm">{item.type}</td>
+                      <td className="px-6 py-4 text-sm">{item.price}</td>
+
+                      <td className="px-6 py-4 text-sm">
                         {item.created_at
                           ? new Date(item.created_at).toLocaleString()
                           : "-"}
@@ -180,10 +181,10 @@ const DataCategorySpesialis = () => {
                 ) : (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data kategori.
+                      Tidak ada data obat.
                     </td>
                   </tr>
                 )}
@@ -211,4 +212,4 @@ const DataCategorySpesialis = () => {
   );
 };
 
-export default DataCategorySpesialis;
+export default DataDrugs;
