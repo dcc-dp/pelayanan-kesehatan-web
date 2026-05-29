@@ -48,15 +48,9 @@ export default function AddModal({ open, onClose, onSuccess }) {
   if (!open) return null;
 
   return (
-<<<<<<< HEAD
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Tambah Resep</h2>
-=======
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center text-black">
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-xl font-bold mb-4">Tambah resep</h2>
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Dropdown Users */}

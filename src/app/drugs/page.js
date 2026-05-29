@@ -48,17 +48,10 @@ const DataDrugs = () => {
         body: JSON.stringify({ id }),
       });
 
-<<<<<<< HEAD
-      if (!response.ok) throw new Error("Gagal menghapus kategori");
-
-      setDrugsData((prev) => prev.filter((item) => item.id !== id));
-      alert("Kategori berhasil dihapus!");
-=======
       if (!response.ok) throw new Error("Gagal menghapus konsultasi");
 
       setDrugsData((prev) => prev.filter((item) => item.id !== id));
       alert("obat berhasil dihapus!");
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
@@ -71,33 +64,20 @@ const DataDrugs = () => {
 
     return drugsData.filter((item) =>
       Object.values(item).some((val) =>
-<<<<<<< HEAD
-        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
-      ),
-=======
         String(val).toLowerCase().includes(searchQuery.toLowerCase())
       )
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
     );
   }, [drugsData, searchQuery]);
 
   return (
-<<<<<<< HEAD
-    <div className="flex min-h-screen font-sans">
-=======
     <div className="flex min-h-screen font-sans text-black">
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
           <h1 className="text-2xl font-semibold flex items-center space-x-2">
             <FaClipboardList className="text-black" />
-<<<<<<< HEAD
-            <span className="text-black">Daftar Obat</span>
-=======
             <span className="text-black">Daftar obat</span>
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
           </h1>
 
           <div className="flex items-center space-x-2 w-full md:w-auto">
@@ -118,11 +98,7 @@ const DataDrugs = () => {
               onClick={() => setOpenAdd(true)}
               className="bg-pink-300 text-white px-4 py-2 rounded"
             >
-<<<<<<< HEAD
-              Tambah Obat
-=======
               Tambah obat
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
             </button>
           </div>
         </div>
@@ -142,15 +118,9 @@ const DataDrugs = () => {
                   {[
                     "No",
                     "ID",
-<<<<<<< HEAD
-                    "Nama Obat",
-                    "Type",
-                    "Harga",
-=======
                     "name",
                     "type",
                     "price",
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -165,14 +135,6 @@ const DataDrugs = () => {
                 </tr>
               </thead>
 
-<<<<<<< HEAD
-              <tbody className="bg-white text-black divide-y text-black">
-                {filteredData.length > 0 ? (
-                  filteredData.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-gray-400">
-                      <td className="px-6 py-4 text-sm">{index + 1}</td>
-                      <td className="px-6 py-4 text-sm">{item.id}</td>
-=======
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
@@ -180,7 +142,6 @@ const DataDrugs = () => {
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
 
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
                       <td className="px-6 py-4 text-sm">{item.name}</td>
                       <td className="px-6 py-4 text-sm">{item.type}</td>
                       <td className="px-6 py-4 text-sm">{item.price}</td>
@@ -220,17 +181,10 @@ const DataDrugs = () => {
                 ) : (
                   <tr>
                     <td
-<<<<<<< HEAD
-                      colSpan={7}
-                      className="px-6 py-4 text-center text-gray-500"
-                    >
-                      Tidak ada data Obat.
-=======
                       colSpan={8}
                       className="px-6 py-4 text-center text-gray-500"
                     >
                       Tidak ada data obat.
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
                     </td>
                   </tr>
                 )}
@@ -239,10 +193,7 @@ const DataDrugs = () => {
           </div>
         )}
       </main>
-<<<<<<< HEAD
-=======
 
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
       {/* Modal Tambah */}
       <AddModal
         open={openAdd}

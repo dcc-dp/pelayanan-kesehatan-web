@@ -49,34 +49,12 @@ import { prisma } from "@/src/libs/prisma";
  */
 export async function GET() {
   try {
-<<<<<<< HEAD
     const data = await prisma.doctor.findMany({
       include: {
         users: true,
         category_spesialis: true,
       },
     });
-=======
-    const db = await pool.getConnection();
-
-    const query = `
-      SELECT 
-        doctor.id,
-        users.name,
-        category_spesialis.specialis_name,
-        doctor.description,
-        doctor.license,
-        doctor.certificate,
-        doctor.created_at,
-        doctor.updated_at
-      FROM doctor
-      INNER JOIN users ON doctor.users_id = users.id
-      INNER JOIN category_spesialis ON doctor.category_spesialis_id = category_spesialis.id
-    `;
-
-    const [rows] = await db.execute(query);
-    db.release();
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
 
     // 🔁 samakan dengan output SQL lama
     const result = data.map((d) => ({

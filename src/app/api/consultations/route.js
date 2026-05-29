@@ -23,39 +23,6 @@ import { prisma } from "@/src/libs/prisma";
  */
 export async function GET() {
   try {
-<<<<<<< HEAD
-    const data = await prisma.consultations.findMany({
-      include: {
-        users: true, // pasien
-        doctor: {
-          include: {
-            users: true, // user dokter
-          },
-        },
-      },
-    });
-
-    // 🔁 format ulang seperti hasil SQL kamu
-    const result = data.map((c) => ({
-      id: c.id,
-      pasien: c.users.name,
-      gender: c.users.gender,
-      email: c.users.email,
-      tgl_lahir: c.users.birth,
-      alamat: c.users.address,
-      nomor_wa: c.users.whatsapp,
-      foto: c.users.image,
-      role: c.users.role,
-      dokter: c.doctor.users.name,
-      deskripsi: c.doctor.description,
-      lisensi: c.doctor.license,
-      sertifikat: c.doctor.certificate,
-      created_at: c.created_at,
-      updated_at: c.updated_at,
-    }));
-
-    return NextResponse.json(result);
-=======
     const db = await pool.getConnection();
     const query = `
       SELECT 
@@ -82,7 +49,6 @@ export async function GET() {
     const [rows] = await db.execute(query);
     db.release();
     return NextResponse.json(rows);
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

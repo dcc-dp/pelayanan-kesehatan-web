@@ -50,7 +50,6 @@ import { prisma } from "@/src/libs/prisma";
  */
 export async function GET() {
   try {
-<<<<<<< HEAD
     const data = await prisma.details.findMany({
       include: {
         drugs: true,
@@ -81,30 +80,6 @@ export async function GET() {
     }));
 
     return NextResponse.json(result);
-=======
-    const db = await pool.getConnection();
-    const query = `
-      SELECT 
-        d.id,
-        d.recipes_id,
-        d.drugs_id,
-        d.jumlah_minum,
-        d.jumlah_hari,
-        d.waktu_minum,
-        dr.name AS nama_drug,
-        pasien.name AS nm_pasien,
-        dokter.name AS nm_dokter
-      FROM details AS d
-      LEFT JOIN drugs AS dr ON d.drugs_id = dr.id
-      LEFT JOIN recipes AS re ON d.recipes_id = re.id
-      LEFT JOIN users pasien ON re.users_id = pasien.id
-      LEFT JOIN doctor drs ON re.doctors_id = drs.id
-      LEFT JOIN users dokter ON drs.users_id = dokter.id
-    `;
-    const [rows] = await db.execute(query);
-    db.release();
-    return NextResponse.json(rows);
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -164,22 +139,9 @@ export async function POST(request) {
   try {
     const data = await request.json();
 
-<<<<<<< HEAD
     const drug = await prisma.drugs.findUnique({
       where: { id: data.drugs_id },
     });
-=======
-    const query =
-      "INSERT INTO details (recipes_id, drugs_id, jumlah_minum, jumlah_hari, waktu_minum) VALUES (?, ?, ?, ?, ?, ?)";
-    const [result] = await db.execute(query, [
-      data.recipes_id,
-      data.drugs_id,
-      data.jumlah_minum,
-      data.jumlah_hari,
-      data.waktu_minum,
-    ]);
-    db.release();
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
 
     if (!drug) {
       return NextResponse.json(
@@ -258,7 +220,6 @@ export async function PUT(request) {
   try {
     const data = await request.json();
 
-<<<<<<< HEAD
     const updated = await prisma.details.updateMany({
       where: { id: data.id },
       data: {
@@ -270,19 +231,6 @@ export async function PUT(request) {
         drugs_id: data.drugs_id,
       },
     });
-=======
-    const query =
-      "UPDATE details SET recipes_id = ?, drugs_id = ?, jumlah_minum = ?, jumlah_hari = ?, waktu_minum = ? WHERE id = ?";
-    await db.execute(query, [
-      data.recipes_id,
-      data.drugs_id,
-      data.jumlah_minum,
-      data.jumlah_hari,
-      data.waktu_minum,
-      detailsId,
-    ]);
-    db.release();
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
 
     if (updated.count === 0) {
       return NextResponse.json(

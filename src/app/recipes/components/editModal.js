@@ -47,11 +47,7 @@ export default function EditModal({ open, onClose, onSuccess, id }) {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-<<<<<<< HEAD
-    const res = await fetch("/api/consultations", {
-=======
     const res = await fetch("/api/recipes", {
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...formData, id }),
@@ -66,11 +62,7 @@ export default function EditModal({ open, onClose, onSuccess, id }) {
   if (!open) return null;
 
   return (
-<<<<<<< HEAD
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-=======
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center text-black">
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-xl font-bold mb-4">Edit resep</h2>
 
