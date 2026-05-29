@@ -70,7 +70,7 @@ const DataConsultations = () => {
   }, [consultationsData, searchQuery]);
 
   return (
-    <div className="flex min-h-screen font-sans">
+    <div className="flex min-h-screen font-sans text-black">
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
@@ -118,8 +118,13 @@ const DataConsultations = () => {
                   {[
                     "No",
                     "ID",
+<<<<<<< HEAD
                     "nama pasien",
                     "nama dokter",
+=======
+                    "pasien",
+                    "Dokter",
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
                     "Tgl Buat",
                     "Tgl Ubah",
                     "Aksi",
@@ -140,7 +145,13 @@ const DataConsultations = () => {
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
+<<<<<<< HEAD
                       <td className="px-6 py-4 text-sm">{item.pasien}</td>
+=======
+                      <td className="px-6 py-4 text-sm">
+                        {item.pasien}
+                      </td>
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
                       <td className="px-6 py-4 text-sm">{item.dokter}</td>
 
                       <td className="px-6 py-4 text-sm">

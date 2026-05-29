@@ -3,37 +3,40 @@ import { useState, useEffect } from "react";
 
 export default function AddModal({ open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    users_id: "",
-    doctors_id: "",
+    recipes_id: "",
+    drugs_id: "",
+    jumlah_minum: "",
+    jumlah_hari: "",
+    waktu_minum: "",
   });
 
-  const [users, setUsers] = useState([]);
-  const [doctors, setDoctors] = useState([]);
+  const [recipes_id, setRecipes] = useState([]);
+  const [drugs, setDrugs] = useState([]);
 
-  // Fetch data users & doctors ketika modal dibuka
+  // Fetch data recipes & drugs ketika modal dibuka
   useEffect(() => {
     if (open) {
-      fetchUsers();
-      fetchDoctors();
+      fetchRecipes();
+      fetchDrugs();
     }
   }, [open]);
 
-  const fetchUsers = async () => {
-    const res = await fetch("/api/users");
+  const fetchRecipes = async () => {
+    const res = await fetch("/api/recipes");
     const data = await res.json();
-    setUsers(data);
+    setRecipes(data);
   };
 
-  const fetchDoctors = async () => {
-    const res = await fetch("/api/doctor");
+  const fetchDrugs = async () => {
+    const res = await fetch("/api/drugs");
     const data = await res.json();
-    setDoctors(data);
+    setDrugs(data);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/api/recipes", {
+    const res = await fetch("/api/details", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -48,15 +51,9 @@ export default function AddModal({ open, onClose, onSuccess }) {
   if (!open) return null;
 
   return (
-<<<<<<< HEAD
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Tambah Resep</h2>
-=======
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center text-black">
       <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Tambah resep</h2>
->>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
+        <h2 className="text-xl font-bold mb-4">Tambah detail obat</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Dropdown Users */}

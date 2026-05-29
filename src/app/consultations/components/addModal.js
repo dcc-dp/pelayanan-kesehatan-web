@@ -33,7 +33,7 @@ export default function AddModal({ open, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
- const res = await fetch("/api/consultations", {
+    const res = await fetch("/api/consultations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -53,7 +53,6 @@ export default function AddModal({ open, onClose, onSuccess }) {
         <h2 className="text-xl font-bold mb-4">Tambah Konsultasi</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           {/* Dropdown Users */}
           <div>
             <label className="font-semibold">Pilih User</label>

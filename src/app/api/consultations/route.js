@@ -23,6 +23,7 @@ import { prisma } from "@/src/libs/prisma";
  */
 export async function GET() {
   try {
+<<<<<<< HEAD
     const data = await prisma.consultations.findMany({
       include: {
         users: true, // pasien
@@ -54,6 +55,34 @@ export async function GET() {
     }));
 
     return NextResponse.json(result);
+=======
+    const db = await pool.getConnection();
+    const query = `
+      SELECT 
+        c.id,
+        u1.name AS pasien,
+        u1.gender,
+        u1.email,
+        u1.birth as tgl_lahir,
+        u1.address as alamat,
+        u1.whatsapp as nomor_wa,
+        u1.image as foto,
+        u1.role as role,
+        u2.name AS dokter,
+        d.description AS deskripsi,
+        d.license AS lisensi,
+        d.certificate AS sertifikat,
+        c.created_at,
+        c.updated_at
+      FROM consultations c
+      INNER JOIN users u1 ON c.users_id = u1.id
+      INNER JOIN doctor d ON c.doctors_id = d.id
+      INNER JOIN users u2 ON d.users_id = u2.id
+    `;
+    const [rows] = await db.execute(query);
+    db.release();
+    return NextResponse.json(rows);
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

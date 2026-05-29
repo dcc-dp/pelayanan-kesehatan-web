@@ -70,7 +70,32 @@ export async function GET(request, { params }) {
       },
     });
 
+<<<<<<< HEAD
     if (data.length === 0) {
+=======
+    const query = `
+      SELECT 
+        d.id,
+        d.jumlah_minum,
+        d.jumlah_hari,
+        d.waktu_minum,
+        dr.name AS nama_drug,
+        pasien.name AS nm_pasien,
+        dokter.name AS nm_dokter
+      FROM details AS d
+      LEFT JOIN drugs AS dr ON d.drugs_id = dr.id
+      LEFT JOIN recipes AS re ON d.recipes_id = re.id
+      LEFT JOIN users pasien ON re.users_id = pasien.id
+      LEFT JOIN doctor drs ON re.doctors_id = drs.id
+      LEFT JOIN users dokter ON drs.users_id = dokter.id
+      WHERE d.id = ?
+
+    `;
+    const [rows] = await db.execute(query, [details]);
+    db.release();
+
+    if (rows.length === 0) {
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
       return NextResponse.json(
         { message: "Tidak ada data detail untuk ID pasien ini" },
         { status: 404 },

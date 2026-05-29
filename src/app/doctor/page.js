@@ -118,8 +118,8 @@ const DataDoctor = () => {
                   {[
                     "No",
                     "ID",
-                    "users_id",
-                    "category",
+                    "nama dokter",
+                    "kategori",
                     "description",
                     "license",
                     "certificate",
@@ -137,18 +137,27 @@ const DataDoctor = () => {
                 </tr>
               </thead>
 
+<<<<<<< HEAD
               <tbody className="bg-white text-black divide-y divide-gray-200">
+=======
+              <tbody className="bg-white divide-y text-black">
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-100">
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
                       <td className="px-6 py-4 text-sm">{item.name}</td>
+<<<<<<< HEAD
                       <td className="px-6 py-4 text-sm">
                         {item.specialis_name}
                       </td>
                       <td className="px-6 py-4 text-sm">{item.description}</td>
+=======
+                      <td className="px-6 py-4 text-sm">{item.specialis_name}</td>
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
                       <td className="px-6 py-4 text-sm">{item.description}</td>
+                      <td className="px-6 py-4 text-sm">{item.license}</td>
                       <td className="px-6 py-4 text-sm">{item.certificate}</td>
 
                       <td className="px-6 py-4 text-sm">

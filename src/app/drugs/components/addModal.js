@@ -28,11 +28,19 @@ export default function AddModal({ open, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg w-96">
+<<<<<<< HEAD
         <h2 className="text-xl font-bold mb-4">Tambah Obat</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label>Nama Obat</label>
+=======
+        <h2 className="text-xl font-bold mb-4">Tambah obat</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label>Nama obat</label>
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
             <input
               className="border p-2 w-full rounded"
               value={formData.name}
@@ -43,7 +51,11 @@ export default function AddModal({ open, onClose, onSuccess }) {
           </div>
 
           <div>
+<<<<<<< HEAD
             <label>Type</label>
+=======
+            <label>type</label>
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
             <input
               className="border p-2 w-full rounded"
               value={formData.type}
@@ -53,8 +65,13 @@ export default function AddModal({ open, onClose, onSuccess }) {
             />
           </div>
 
+<<<<<<< HEAD
           <div>
             <label>Harga</label>
+=======
+           <div>
+            <label>price</label>
+>>>>>>> 3296d7c76983a4448baeb199edd0ba18bec61877
             <input
               className="border p-2 w-full rounded"
               value={formData.price}
