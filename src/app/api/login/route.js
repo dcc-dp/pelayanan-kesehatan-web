@@ -72,15 +72,19 @@ export async function POST(request) {
       );
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    // const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
+    // if (!isMatch) {
+    //   return NextResponse.json({ message: "Password salah" }, { status: 401 });
+    // }
+
+    if (password !== user.password) {
       return NextResponse.json({ message: "Password salah" }, { status: 401 });
     }
-
     delete user.password;
 
     return NextResponse.json({
+      success: true, 
       message: "Login berhasil",
       user,
     });
