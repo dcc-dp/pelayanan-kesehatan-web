@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import EditModal from "../bookings/components/editModal";
+// import EditModal from "../bookings/components/editModal";
 
 const DataBookings = () => {
   const [bookingsData, setBookingsData] = useState([]);

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { FiX } from "react-icons/fi";
 
 export default function AddModal({ open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -59,15 +60,62 @@ export default function AddModal({ open, onClose, onSuccess }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center text-black">
-      <div className="bg-white p-6 rounded-lg w-96">
-        <h2 className="text-xl font-bold mb-4">Tambah Dokter</h2>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+                        {/* Header */}
+                <div className="flex items-center justify-between p-8 border-b border-gray-100">
+        
+                  <div className="flex items-center gap-5">
+        
+                    <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+                      <span className="text-4xl text-blue-600">+</span>
+                    </div>
+        
+                    <div>
+                      <h2 className="text-3xl font-semibold text-gray-800">
+                        Tambah doctor
+                      </h2>
+        
+                      <p className="text-gray-500 mt-1">
+                        Tambahkan doctor baru
+                      </p>
+                    </div>
+        
+                  </div>
+        
+                  <button
+                    onClick={onClose}
+                    className="text-gray-400 hover:text-gray-600 text-3xl"
+                  >
+                    <FiX />
+                  </button>
+        
+                </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          <div className="p-8 space-y-6 overflow-y-auto flex-1">
           <div>
-            <label className="font-semibold">Pilih User</label>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Pilih nama dokter
+                <span className="text-red-500 ml-1">*</span>
+              </label>
             <select
-              className="border p-2 w-full rounded"
+                className="
+                  w-full
+                  h-14
+                  px-5
+                  border
+                  border-gray-200
+                  rounded-2xl
+                  text-gray-700
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-100
+                  focus:border-blue-500
+                "
               value={formData.users_id}
               onChange={(e) =>
                 setFormData({ ...formData, users_id: e.target.value })
@@ -83,9 +131,24 @@ export default function AddModal({ open, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="font-semibold">Pilih Kategori Spesialis</label>
+            <label className="block text-lg font-medium text-gray-700 mb-3">
+              Pilih kategori spesialis
+              <span className="text-red-500 ml-1">*</span>
+            </label>
             <select
-              className="border p-2 w-full rounded"
+              className="
+                w-full
+                h-14
+                px-5
+                border
+                border-gray-200
+                rounded-2xl
+                text-gray-700
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-100
+                focus:border-blue-500
+              "
               value={formData.category_spesialis_id}
               onChange={(e) =>
                 setFormData({
@@ -101,19 +164,60 @@ export default function AddModal({ open, onClose, onSuccess }) {
                 </option>
               ))}
             </select>
+            </div>
 
-            <label>Deskripsi</label>
-            <input
-              className="border p-2 w-full rounded"
+          <div>
+            <label className="block text-lg font-medium text-gray-700 mb-3">
+              Deskripsi
+              <span className="text-red-500 ml-1">*</span>
+            </label>
+
+            <textarea
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-            />
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  description: e.target.value,
+                });
 
+                e.target.style.height = "auto";
+                e.target.style.height =
+                  e.target.scrollHeight + "px";
+              }}
+              className="
+                w-full
+                min-h-[120px]
+                px-5
+                py-4
+                border
+                border-gray-200
+                rounded-2xl
+                text-gray-700
+                overflow-hidden
+                resize-none
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-100
+                focus:border-blue-500
+              "
+              placeholder="Masukkan deskripsi dokter..."
+            />
+          </div>
             <label>Lisensi</label>
             <input
-              className="border p-2 w-full rounded"
+                            className="
+                w-full
+                h-14
+                px-5
+                border
+                border-gray-200
+                rounded-2xl
+                text-gray-700
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-100
+                focus:border-blue-500
+              "
               value={formData.license}
               onChange={(e) =>
                 setFormData({ ...formData, license: e.target.value })
@@ -122,7 +226,19 @@ export default function AddModal({ open, onClose, onSuccess }) {
 
             <label>Sertifikat</label>
             <input
-              className="border p-2 w-full rounded"
+                           className="
+                w-full
+                h-14
+                px-5
+                border
+                border-gray-200
+                rounded-2xl
+                text-gray-700
+                focus:outline-none
+                focus:ring-2
+                focus:ring-blue-100
+                focus:border-blue-500
+              "
               value={formData.certificate}
               onChange={(e) =>
                 setFormData({ ...formData, certificate: e.target.value })
@@ -130,17 +246,44 @@ export default function AddModal({ open, onClose, onSuccess }) {
             />
           </div>
 
-          <button className="w-full bg-pink-300 text-white p-2 rounded">
+          <div className="border-t border-gray-100 p-6 flex justify-end gap-4">
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="
+              px-8
+              py-3
+              rounded-2xl
+              border
+              border-gray-200
+              text-gray-600
+              hover:bg-gray-50
+              transition
+            "
+          >
+            Batal
+          </button>
+
+          <button
+            type="submit"
+            className="
+              px-8
+              py-3
+              rounded-2xl
+              bg-blue-600
+              hover:bg-blue-700
+              text-white
+              font-medium
+              transition
+            "
+          >
             Simpan
           </button>
-        </form>
 
-        <button
-          onClick={onClose}
-          className="mt-3 w-full p-2 bg-gray-300 rounded"
-        >
-          Batal
-        </button>
+        </div>
+        
+        </form>
       </div>
     </div>
   );

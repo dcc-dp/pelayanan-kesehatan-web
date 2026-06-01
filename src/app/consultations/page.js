@@ -48,7 +48,7 @@ const DataConsultations = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/consultations/${id}`, {
+      const response = await fetch(`/api/consultations`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -57,14 +57,14 @@ const DataConsultations = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Gagal menghapus kategori");
+        throw new Error("Gagal menghapus konsultasi");
       }
 
       setConsultationsData((prev) =>
         prev.filter((item) => item.id !== id)
       );
 
-      alert("Kategori berhasil dihapus!");
+      alert("Konsultasi berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
