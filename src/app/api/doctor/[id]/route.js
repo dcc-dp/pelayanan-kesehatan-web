@@ -53,6 +53,8 @@ export async function GET(request, { params }) {
     const result = {
       id: doctor.id,
       users_id: doctor.users_id,
+      name: doctor.users?.name || null,
+      image: doctor.users?.image || null,
       category_spesialis_id: doctor.category_spesialis_id,
       category: doctor.category_spesialis?.specialis_name || null,
       description: doctor.description,

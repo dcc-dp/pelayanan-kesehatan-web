@@ -25,9 +25,9 @@ export default withAuth(
   }
 );
 
-// Lindungi semua route KECUALI api auth, halaman login, halaman depan, file statis & internal Next.js
+// Lindungi semua route KECUALI api, halaman login, halaman depan, file statis & internal Next.js
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|login|$).*)"
+    "/((?!api|_next/static|_next/image|favicon.ico|login|$).*)"
   ],
 };
