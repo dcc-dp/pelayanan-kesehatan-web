@@ -20,50 +20,65 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
-  const menuItems = [
-    {
-      icon: <FaHome />,
-      label: "Dashboard",
-      url: "/admin",
-    },
-    {
-      icon: <FaUserFriends />,
-      label: "Data Pasien",
-      url: "/admin/patients",
-    },
-    {
-      icon: <FaUserMd />,
-      label: "Data Dokter",
-      url: "/admin/doctors",
-    },
-    {
-      icon: <FaCalendarAlt />,
-      label: "Jadwal Dokter",
-      url: "/admin/schedule",
-    },
-    {
-      icon: <FaClipboardList />,
-      label: "Bookings",
-      url: "/admin/bookings",
-    },
-    {
-      icon: <FaFileMedical />,
-      label: "Rekam Medis",
-      url: "/admin/records",
-    },
-  ];
+const menuItems = [
+  {
+    icon: <FaHome />,
+    label: "Dashboard",
+    url: "/dashboard",
+  },
+  {
+    icon: <FaClipboardList />,
+    label: "Bookings",
+    url: "/bookings",
+  },
+  {
+    icon: <FaClipboardList />,
+    label: "Category Specialist",
+    url: "/category-spesialis",
+  },
+  {
+    icon: <FaUserFriends />,
+    label: "Consultations",
+    url: "/consultations",
+  },
+  {
+    icon: <FaFileMedical />,
+    label: "Details",
+    url: "/details",
+  },
+  {
+    icon: <FaUserMd />,
+    label: "Doctor",
+    url: "/doctor",
+  },
+  {
+    icon: <FaFileMedical />,
+    label: "Drugs",
+    url: "/drugs",
+  },
+  {
+    icon: <FaFileMedical />,
+    label: "Recipes",
+    url: "/recipes",
+  },
+  {
+    icon: <FaCalendarAlt />,
+    label: "Schedules",
+    url: "/schedules",
+  },
+];
 
   return (
     <aside
       className={`${
-        collapsed ? "w-20" : "w-64"
-      } min-h-screen bg-gradient-to-b from-blue-600 to-blue-800 text-white flex flex-col transition-all duration-300 shadow-xl`}
+        collapsed ? "w-20" : "w-[280px]"
+      } min-h-screen bg-gradient-to-b from-[#1f6feb] via-[#1b5fd8] to-[#1547b8] text-white flex flex-col transition-all duration-300 shadow-xl`}
     >
       {/* HEADER */}
-      <div className="flex items-center justify-between px-5 py-5 border-b border-blue-400">
+      <div className="flex items-center justify-between px-5 py-6 border-b border-blue-400/30">
         {!collapsed && (
           <div>
-            <h1 className="text-2xl font-bold">MediCare</h1>
+            <h1 className="text-[18px] font-bold tracking-tight">MediCare</h1>
             <p className="text-xs text-blue-100">
               Hospital Management
             </p>
@@ -79,19 +94,21 @@ const Sidebar = () => {
       </div>
 
       {/* MENU */}
-      <nav className="flex-1 px-3 py-6 space-y-2">
+      <nav className="flex-1 px-4 py-8 space-y-3">
         {menuItems.map((item, index) => {
-          const active = pathname === item.url;
+          const active =
+          pathname === item.url ||
+          pathname.startsWith(item.url + "/");
 
           return (
             <Link key={index} href={item.url}>
               <div
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-200
                   
                   ${
                     active
-                      ? "bg-blue-900 shadow-lg"
-                      : "hover:bg-blue-700"
+                      ? "bg-blue-800 shadow-md"
+                      : "hover:bg-blue-700/60"
                   }
                 `}
               >
@@ -109,10 +126,10 @@ const Sidebar = () => {
       </nav>
 
       {/* LOGOUT */}
-      <div className="p-4 border-t border-blue-400">
+      <div className="p-4 border-t border-blue-400/30">
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="flex items-center gap-4 w-full px-4 py-3 rounded-xl hover:bg-red-500 transition"
+         className="flex items-center gap-4 w-full px-4 py-3 rounded-xl hover:bg-red-500/90 transition-all duration-200"
         >
           <FiLogOut className="text-lg" />
 
