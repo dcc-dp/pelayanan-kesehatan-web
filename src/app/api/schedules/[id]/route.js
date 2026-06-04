@@ -34,6 +34,12 @@ import { prisma } from "@/src/libs/prisma";
  *                 id:
  *                   type: integer
  *                   example: 1
+ *                 users_id:
+ *                   type: integer
+ *                   example: 2
+ *                 doctors_id:
+ *                   type: integer
+ *                   example: 3
  *                 date:
  *                   type: string
  *                   format: date
@@ -98,11 +104,13 @@ export async function GET(request, { params }) {
     // format response biar mirip query SQL kamu sebelumnya
     const result = {
       id: data.id,
+      users_id: data.users_id,
+      doctors_id: data.doctors_id,
       date: data.date,
       time: data.time,
       status: data.status,
-      nama_pasien: data.users.name,
-      nama_dokter: data.doctor.users.name,
+      nama_pasien: data.users?.name,
+      nama_dokter: data.doctor?.users?.name,
     };
 
     return NextResponse.json(result);

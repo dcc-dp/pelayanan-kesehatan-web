@@ -107,10 +107,10 @@ const currentData = filteredData.slice(
 );
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 w-full overflow-hidden">
       <Sidebar />
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 min-w-0 overflow-y-auto">
 
 {/* Header */}
 <div className="mb-6">
@@ -172,11 +172,11 @@ const currentData = filteredData.slice(
         {/* Table Card */}
         <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden mt-2">
 
-          <div className="px-8 py-6 flex justify-between items-center border-b border-gray-100">
-            <h2 className="text-[22px] font-semibold text-gray-800">
+          <div className="px-8 py-6 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-gray-100">
+            <h2 className="text-[22px] font-semibold text-gray-800 shrink-0">
               Doctor List
             </h2>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
             <div className="relative">
 
               <input
@@ -240,9 +240,8 @@ const currentData = filteredData.slice(
           )}
 
           {!loading && !error && (
-            <div className="overflow-x-auto">
-
-              <table className="w-full">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full whitespace-nowrap min-w-max">
 
                 <thead className="bg-[#f8fafc]">
                   <tr>
@@ -352,7 +351,7 @@ const currentData = filteredData.slice(
                   ) : (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={9}
                         className="text-center py-10 text-gray-500"
                       >
                        <div className="h-[260px] flex flex-col items-center justify-center">
@@ -362,11 +361,11 @@ const currentData = filteredData.slice(
                       </div>
 
                       <h3 className="font-semibold text-gray-700">
-                        Tidak ada data konsultasi.
+                        Tidak ada data Doctor.
                       </h3>
 
                       <p className="text-gray-400 mt-2">
-                        Klik tombol "Add Consultation" untuk menambahkan konsultasi baru.
+                        Klik tombol "Add Doctor" untuk menambahkan dokter baru.
                       </p>
 
                     </div>

@@ -23,31 +23,35 @@ import { prisma } from "@/src/libs/prisma";
  */
 export async function GET() {
   try {
-    const db = await pool.getConnection();
-    const query = `
-      SELECT 
-        c.id,
-        u1.name AS pasien,
-        u1.gender,
-        u1.email,
-        u1.birth as tgl_lahir,
-        u1.address as alamat,
-        u1.whatsapp as nomor_wa,
-        u1.image as foto,
-        u1.role as role,
-        u2.name AS dokter,
-        d.description AS deskripsi,
-        d.license AS lisensi,
-        d.certificate AS sertifikat,
-        c.created_at,
-        c.updated_at
-      FROM consultations c
-      INNER JOIN users u1 ON c.users_id = u1.id
-      INNER JOIN doctor d ON c.doctors_id = d.id
-      INNER JOIN users u2 ON d.users_id = u2.id
-    `;
-    const [rows] = await db.execute(query);
-    db.release();
+    const data = await prisma.consultations.findMany({
+      include: {
+        users: true,
+        doctor: {
+          include: {
+            users: true,
+          },
+        },
+      },
+    });
+
+    const rows = data.map((c) => ({
+      id: c.id,
+      pasien: c.users?.name,
+      gender: c.users?.gender,
+      email: c.users?.email,
+      tgl_lahir: c.users?.birth,
+      alamat: c.users?.address,
+      nomor_wa: c.users?.whatsapp,
+      foto: c.users?.image,
+      role: c.users?.role,
+      dokter: c.doctor?.users?.name,
+      deskripsi: c.doctor?.description,
+      lisensi: c.doctor?.license,
+      sertifikat: c.doctor?.certificate,
+      created_at: c.created_at,
+      updated_at: c.updated_at,
+    }));
+
     return NextResponse.json(rows);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -99,10 +103,10 @@ export async function POST(request) {
     const newData = await prisma.consultations.create({
       data: {
         users: {
-          connect: { id: data.users_id },
+          connect: { id: parseInt(data.users_id) },
         },
         doctor: {
-          connect: { id: data.doctors_id },
+          connect: { id: parseInt(data.doctors_id) },
         },
       },
     });
@@ -160,10 +164,10 @@ export async function PUT(request) {
     }
 
     const updated = await prisma.consultations.updateMany({
-      where: { id: data.id },
+      where: { id: parseInt(data.id) },
       data: {
-        users_id: data.users_id,
-        doctors_id: data.doctors_id,
+        users_id: parseInt(data.users_id),
+        doctors_id: parseInt(data.doctors_id),
       },
     });
 
@@ -218,7 +222,7 @@ export async function DELETE(request) {
     }
 
     const deleted = await prisma.consultations.deleteMany({
-      where: { id: data.id },
+      where: { id: parseInt(data.id) },
     });
 
     if (deleted.count === 0) {

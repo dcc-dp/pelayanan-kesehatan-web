@@ -93,6 +93,12 @@ export async function GET() {
             nm_pembeli: b.recipes.users.name,
             nm_dokter: b.recipes.doctor.users.name,
             obat: null,
+            harga: null,
+            jumlah_minum: null,
+            jumlah_hari: null,
+            waktu_minum: null,
+            created_at: b.created_at,
+            updated_at: b.updated_at,
           },
         ];
       }
@@ -105,6 +111,12 @@ export async function GET() {
         nm_pembeli: b.recipes.users.name,
         nm_dokter: b.recipes.doctor.users.name,
         obat: dt.drugs.name,
+        harga: dt.drugs.price,
+        jumlah_minum: dt.jumlah_minum,
+        jumlah_hari: dt.jumlah_hari,
+        waktu_minum: dt.waktu_minum,
+        created_at: b.created_at,
+        updated_at: b.updated_at,
       }));
     });
 

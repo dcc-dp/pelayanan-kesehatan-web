@@ -140,7 +140,7 @@ export async function POST(request) {
     const data = await request.json();
 
     const drug = await prisma.drugs.findUnique({
-      where: { id: data.drugs_id },
+      where: { id: parseInt(data.drugs_id) },
     });
 
     if (!drug) {
@@ -151,7 +151,7 @@ export async function POST(request) {
     }
 
     const recipe = await prisma.recipes.findUnique({
-      where: { id: data.recipes_id },
+      where: { id: parseInt(data.recipes_id) },
     });
 
     if (!recipe) {
@@ -163,12 +163,12 @@ export async function POST(request) {
 
     const newData = await prisma.details.create({
       data: {
-        jumlah: data.jumlah,
-        jumlah_minum: data.jumlah_minum,
-        jumlah_hari: data.jumlah_hari,
+        jumlah: parseInt(data.jumlah),
+        jumlah_minum: parseInt(data.jumlah_minum),
+        jumlah_hari: parseInt(data.jumlah_hari),
         waktu_minum: data.waktu_minum,
-        recipes: { connect: { id: data.recipes_id } },
-        drugs: { connect: { id: data.drugs_id } },
+        recipes: { connect: { id: parseInt(data.recipes_id) } },
+        drugs: { connect: { id: parseInt(data.drugs_id) } },
       },
     });
 
@@ -221,14 +221,13 @@ export async function PUT(request) {
     const data = await request.json();
 
     const updated = await prisma.details.updateMany({
-      where: { id: data.id },
+      where: { id: parseInt(data.id) },
       data: {
-        jumlah: data.jumlah,
-        jumlah_minum: data.jumlah_minum,
-        jumlah_hari: data.jumlah_hari,
+        jumlah: parseInt(data.jumlah),
+        jumlah_minum: parseInt(data.jumlah_minum),
+        jumlah_hari: parseInt(data.jumlah_hari),
         waktu_minum: data.waktu_minum,
-        recipes_id: data.recipes_id,
-        drugs_id: data.drugs_id,
+        drugs_id: parseInt(data.drugs_id),
       },
     });
 
@@ -278,7 +277,7 @@ export async function DELETE(request) {
     const data = await request.json();
 
     const deleted = await prisma.details.deleteMany({
-      where: { id: data.id },
+      where: { id: parseInt(data.id) },
     });
 
     if (deleted.count === 0) {

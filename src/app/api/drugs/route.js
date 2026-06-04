@@ -107,7 +107,7 @@ export async function POST(request) {
       data: {
         name: data.name,
         type: data.type,
-        price: data.price,
+        price: parseInt(data.price, 10),
       },
     });
 
@@ -188,7 +188,7 @@ export async function PUT(request) {
       data: {
         name: data.name,
         type: data.type,
-        price: data.price,
+        price: data.price ? parseInt(data.price, 10) : undefined,
       },
     });
 

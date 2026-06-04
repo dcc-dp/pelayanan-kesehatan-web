@@ -1,0 +1,237 @@
+"use client";
+import { useState, useEffect } from "react";
+import { FiX, FiEdit2 } from "react-icons/fi";
+
+export default function EditModal({ open, onClose, onSuccess, id }) {
+  const [formData, setFormData] = useState({
+    users_id: "",
+    doctors_id: "",
+    date: "",
+    time: "",
+    status: "proses",
+  });
+
+  const [users, setUsers] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    if (open) {
+      fetchUsers();
+      fetchDoctors();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !id) return;
+
+    async function fetchData() {
+      try {
+        const res = await fetch(`/api/schedules/${id}`);
+        const data = await res.json();
+        
+        if (data) {
+          // Parse date and time to strings compatible with <input type="date"|"time">
+          const dateStr = data.date ? new Date(data.date).toISOString().split('T')[0] : "";
+          
+          let timeStr = "";
+          if (data.time) {
+            const timeObj = new Date(data.time);
+            const hours = String(timeObj.getUTCHours()).padStart(2, '0');
+            const minutes = String(timeObj.getUTCMinutes()).padStart(2, '0');
+            timeStr = `${hours}:${minutes}`;
+          }
+
+          setFormData({
+            users_id: data.users_id || "",
+            doctors_id: data.doctors_id || "",
+            date: dateStr,
+            time: timeStr,
+            status: data.status || "proses",
+          });
+        }
+      } catch (error) {
+        console.error("Gagal mengambil data schedule", error);
+      }
+    }
+    fetchData();
+  }, [open, id]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      setUsers(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchDoctors = async () => {
+    try {
+      const res = await fetch("/api/doctor");
+      const data = await res.json();
+      setDoctors(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch("/api/schedules", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          ...formData
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal memperbarui jadwal");
+      }
+
+      onSuccess();
+      onClose();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+        {/* HEADER */}
+        <div className="flex items-center justify-between p-8 border-b border-gray-100">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+              <FiEdit2 className="text-blue-600 text-3xl" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-semibold text-gray-800">
+                Edit Jadwal
+              </h2>
+              <p className="text-gray-500 mt-1">
+                Perbarui data jadwal konsultasi
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition"
+          >
+            <FiX size={30} />
+          </button>
+        </div>
+
+        {/* BODY */}
+        <form
+          onSubmit={handleUpdate}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          <div className="p-8 space-y-6 overflow-y-auto flex-1">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3">
+                  Pilih Pasien <span className="text-red-500 ml-1">*</span>
+                </label>
+                <select
+                  className="w-full h-14 px-5 border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  value={formData.users_id}
+                  onChange={(e) => setFormData({ ...formData, users_id: e.target.value })}
+                  required
+                >
+                  <option value="">-- Pilih Pasien --</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3">
+                  Pilih Dokter <span className="text-red-500 ml-1">*</span>
+                </label>
+                <select
+                  className="w-full h-14 px-5 border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  value={formData.doctors_id}
+                  onChange={(e) => setFormData({ ...formData, doctors_id: e.target.value })}
+                  required
+                >
+                  <option value="">-- Pilih Dokter --</option>
+                  {doctors.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3">
+                  Tanggal <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="date"
+                  className="w-full h-14 px-5 border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium text-gray-700 mb-3">
+                  Waktu <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="time"
+                  className="w-full h-14 px-5 border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  value={formData.time}
+                  onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-lg font-medium text-gray-700 mb-3">
+                  Status <span className="text-red-500 ml-1">*</span>
+                </label>
+                <select
+                  className="w-full h-14 px-5 border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  required
+                >
+                  <option value="proses">Proses</option>
+                  <option value="terima">Terima</option>
+                  <option value="tolak">Tolak</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* FOOTER */}
+          <div className="border-t border-gray-100 p-6 flex justify-end gap-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-8 py-3 rounded-2xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              className="px-8 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
+            >
+              Update
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

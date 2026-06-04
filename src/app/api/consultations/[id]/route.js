@@ -19,6 +19,45 @@ import { prisma } from "@/src/libs/prisma";
  *     responses:
  *       200:
  *         description: Data konsultasi berhasil diambil.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   users_id:
+ *                     type: integer
+ *                   doctors_id:
+ *                     type: integer
+ *                   pasien:
+ *                     type: string
+ *                   gender:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   tgl_lahir:
+ *                     type: string
+ *                     format: date-time
+ *                   alamat:
+ *                     type: string
+ *                   nomor_wa:
+ *                     type: string
+ *                   foto:
+ *                     type: string
+ *                     nullable: true
+ *                   role:
+ *                     type: string
+ *                   dokter:
+ *                     type: string
+ *                   deskripsi:
+ *                     type: string
+ *                   lisensi:
+ *                     type: string
+ *                   sertifikat:
+ *                     type: string
  *       404:
  *         description: Data konsultasi tidak ditemukan.
  *       500:

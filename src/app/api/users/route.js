@@ -148,7 +148,9 @@ export async function POST(request) {
     const user = await prisma.users.create({
       data: {
         name: body.name,
-        gender: body.gender,
+        gender: body.gender === "Laki-laki" || body.gender === "laki-laki" ? "laki_laki" : 
+                body.gender === "Perempuan" || body.gender === "perempuan" ? "perempuan" : 
+                body.gender,
         birth: body.birth ? new Date(body.birth) : null,
         address: body.address,
         whatsapp: body.whatsapp,
@@ -250,7 +252,9 @@ export async function PUT(request) {
       where: { id: body.id },
       data: {
         name: body.name,
-        gender: body.gender,
+        gender: body.gender === "Laki-laki" || body.gender === "laki-laki" ? "laki_laki" : 
+                body.gender === "Perempuan" || body.gender === "perempuan" ? "perempuan" : 
+                body.gender,
         birth: body.birth ? new Date(body.birth) : null,
         address: body.address,
         whatsapp: body.whatsapp,

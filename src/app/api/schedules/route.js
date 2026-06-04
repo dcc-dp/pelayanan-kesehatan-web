@@ -114,10 +114,10 @@ export async function POST(request) {
 
     const newData = await prisma.schedules.create({
       data: {
-        users_id: data.users_id,
-        doctors_id: data.doctors_id,
-        date: data.date,
-        time: data.time,
+        users_id: parseInt(data.users_id),
+        doctors_id: parseInt(data.doctors_id),
+        date: new Date(data.date),
+        time: new Date(`1970-01-01T${data.time}`),
         status: data.status,
       },
     });
@@ -203,8 +203,8 @@ export async function PUT(request) {
     const updated = await prisma.schedules.update({
       where: { id: data.id },
       data: {
-        users_id: data.users_id,
-        doctors_id: data.doctors_id,
+        users_id: parseInt(data.users_id),
+        doctors_id: parseInt(data.doctors_id),
         date: new Date(data.date), // ✅ FIX
         time: new Date(`1970-01-01T${data.time}`), // ✅ FIX
         status: data.status,

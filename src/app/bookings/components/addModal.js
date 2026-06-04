@@ -4,48 +4,43 @@ import { FiX, FiPlusCircle } from "react-icons/fi";
 
 export default function AddModal({ open, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
-    users_id: "",
-    doctors_id: "",
+    recipes_id: "",
   });
 
-  const [users, setUsers] = useState([]);
-  const [doctors, setDoctors] = useState([]);
+  const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
-    if (!open) return;
-    
-    setFormData({
-      users_id: "",
-      doctors_id: "",
-    });
-
-    const fetchDropdownData = async () => {
-      try {
-        const usersRes = await fetch("/api/users");
-        const usersData = await usersRes.json();
-        setUsers(usersData);
-
-        const doctorsRes = await fetch("/api/doctor");
-        const doctorsData = await doctorsRes.json();
-        setDoctors(doctorsData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchDropdownData();
+    if (open) {
+      setFormData({ recipes_id: "" });
+      fetchRecipes();
+    }
   }, [open]);
+
+  const fetchRecipes = async () => {
+    try {
+      const res = await fetch("/api/recipes");
+      const data = await res.json();
+      setRecipes(data);
+    } catch (error) {
+      console.error("Gagal memuat recipes:", error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await fetch("/api/recipes", {
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ recipes_id: parseInt(formData.recipes_id) }),
       });
 
-      if (!res.ok) throw new Error("Gagal menambah data resep");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal membuat booking");
+      }
 
       onSuccess();
       onClose();
@@ -67,10 +62,10 @@ export default function AddModal({ open, onClose, onSuccess }) {
             </div>
             <div>
               <h2 className="text-3xl font-semibold text-gray-800">
-                Add Recipe
+                Tambah Booking
               </h2>
               <p className="text-gray-500 mt-1">
-                Tambahkan data resep baru
+                Buat tagihan untuk resep pasien
               </p>
             </div>
           </div>
@@ -90,46 +85,27 @@ export default function AddModal({ open, onClose, onSuccess }) {
           <div className="p-8 space-y-6 overflow-y-auto flex-1">
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Pilih User
+                Pilih Resep / Pasien
                 <span className="text-red-500 ml-1">*</span>
               </label>
               <select
                 className="w-full h-14 px-5 border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
-                value={formData.users_id}
+                value={formData.recipes_id}
                 onChange={(e) =>
-                  setFormData({ ...formData, users_id: e.target.value })
+                  setFormData({ ...formData, recipes_id: e.target.value })
                 }
                 required
               >
-                <option value="">-- Pilih User --</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name}
+                <option value="">-- Pilih Resep --</option>
+                {recipes.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    Resep #{r.id} - Pasien: {r.pasien} (Dokter: {r.dokter})
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Pilih Dokter
-                <span className="text-red-500 ml-1">*</span>
-              </label>
-              <select
-                className="w-full h-14 px-5 border border-gray-200 rounded-2xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
-                value={formData.doctors_id}
-                onChange={(e) =>
-                  setFormData({ ...formData, doctors_id: e.target.value })
-                }
-                required
-              >
-                <option value="">-- Pilih Dokter --</option>
-                {doctors.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
+              <p className="text-sm text-gray-400 mt-2">
+                Total biaya akan dihitung secara otomatis berdasarkan rincian obat di dalam resep.
+              </p>
             </div>
           </div>
 

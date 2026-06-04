@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { FiX, FiEdit2 } from "react-icons/fi";
 
-export default function EditModal({ open, onClose, onSuccess, doctorId }) {
+export default function EditModal({ open, onClose, onSuccess, id }) {
   const [formData, setFormData] = useState({
     users_id: "",
     category_spesialis_id: "",
@@ -39,11 +39,11 @@ export default function EditModal({ open, onClose, onSuccess, doctorId }) {
   // Fetch dropdown options
   // Fetch data dokter untuk edit
   useEffect(() => {
-    if (!open || !doctorId) return;
+    if (!open || !id) return;
 
     const fetchDoctor = async () => {
       try {
-        const res = await fetch(`/api/doctor/${doctorId}`);
+        const res = await fetch(`/api/doctor/${id}`);
         if (!res.ok) throw new Error("Gagal mengambil data dokter");
         const data = await res.json();
 
@@ -61,32 +61,8 @@ export default function EditModal({ open, onClose, onSuccess, doctorId }) {
     };
 
     fetchDoctor();
-  }, [open, doctorId]);
-  // Fetch data dokter untuk edit
-  useEffect(() => {
-    if (!open || !doctorId) return;
+  }, [open, id]);
 
-    const fetchDoctor = async () => {
-      try {
-        const res = await fetch(`/api/doctor/${doctorId}`);
-        if (!res.ok) throw new Error("Gagal mengambil data dokter");
-        const data = await res.json();
-
-        setFormData({
-          users_id: data.users_id || "",
-          category_spesialis_id: data.category_spesialis_id || "",
-          description: data.description || "",
-          license: data.license || "",
-          certificate: data.certificate || "",
-        });
-      } catch (err) {
-        console.error(err);
-        alert("Gagal memuat data dokter");
-      }
-    };
-
-    fetchDoctor();
-  }, [open, doctorId]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -94,7 +70,7 @@ export default function EditModal({ open, onClose, onSuccess, doctorId }) {
       const res = await fetch("/api/doctor", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, id: doctorId }),
+        body: JSON.stringify({ ...formData, id }),
       });
 
       if (!res.ok) throw new Error("Gagal memperbarui data dokter");

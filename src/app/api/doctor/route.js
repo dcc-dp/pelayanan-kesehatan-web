@@ -116,7 +116,7 @@ export async function POST(request) {
 
     // ✅ validasi FK users
     const user = await prisma.users.findUnique({
-      where: { id: data.users_id },
+      where: { id: parseInt(data.users_id) },
     });
 
     if (!user) {
@@ -129,7 +129,7 @@ export async function POST(request) {
     // ✅ optional validasi kategori
     if (data.category_spesialis_id) {
       const category = await prisma.category_spesialis.findUnique({
-        where: { id: data.category_spesialis_id },
+        where: { id: parseInt(data.category_spesialis_id) },
       });
 
       if (!category) {
@@ -146,11 +146,11 @@ export async function POST(request) {
         license: data.license,
         certificate: data.certificate,
         users: {
-          connect: { id: data.users_id },
+          connect: { id: parseInt(data.users_id) },
         },
         ...(data.category_spesialis_id && {
           category_spesialis: {
-            connect: { id: data.category_spesialis_id },
+            connect: { id: parseInt(data.category_spesialis_id) },
           },
         }),
       },
@@ -200,9 +200,9 @@ export async function PUT(request) {
     const data = await request.json();
 
     const updated = await prisma.doctor.updateMany({
-      where: { id: data.id },
+      where: { id: parseInt(data.id) },
       data: {
-        category_spesialis_id: data.category_spesialis_id,
+        category_spesialis_id: data.category_spesialis_id ? parseInt(data.category_spesialis_id) : null,
         description: data.description,
         license: data.license,
         certificate: data.certificate,
@@ -254,7 +254,7 @@ export async function DELETE(request) {
     const data = await request.json();
 
     const deleted = await prisma.doctor.deleteMany({
-      where: { id: data.id },
+      where: { id: parseInt(data.id) },
     });
 
     if (deleted.count === 0) {

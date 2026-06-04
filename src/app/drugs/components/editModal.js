@@ -21,7 +21,7 @@ export default function EditModal({
 
     async function fetchData() {
       const res = await fetch(
-        `/api/category_spesialis/${id}`
+        `/api/drugs/${id}`
       );
 
       const data = await res.json();
@@ -40,7 +40,7 @@ export default function EditModal({
     e.preventDefault();
 
     const res = await fetch(
-      "/api/category_spesialis",
+      "/api/drugs",
       {
         method: "PUT",
         headers: {

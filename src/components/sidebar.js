@@ -11,6 +11,8 @@ import {
   FaCalendarAlt,
   FaClipboardList,
   FaFileMedical,
+  FaPills,
+  FaStethoscope,
 } from "react-icons/fa";
 
 import { FiLogOut } from "react-icons/fi";
@@ -20,53 +22,37 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
-const menuItems = [
-  {
-    icon: <FaHome />,
-    label: "Dashboard",
-    url: "/dashboard",
-  },
-  {
-    icon: <FaClipboardList />,
-    label: "Bookings",
-    url: "/bookings",
-  },
-  {
-    icon: <FaClipboardList />,
-    label: "Category Specialist",
-    url: "/category-spesialis",
-  },
-  {
-    icon: <FaUserFriends />,
-    label: "Consultations",
-    url: "/consultations",
-  },
-  {
-    icon: <FaFileMedical />,
-    label: "Details",
-    url: "/details",
-  },
-  {
-    icon: <FaUserMd />,
-    label: "Doctor",
-    url: "/doctor",
-  },
-  {
-    icon: <FaFileMedical />,
-    label: "Drugs",
-    url: "/drugs",
-  },
-  {
-    icon: <FaFileMedical />,
-    label: "Recipes",
-    url: "/recipes",
-  },
-  {
-    icon: <FaCalendarAlt />,
-    label: "Schedules",
-    url: "/schedules",
-  },
-];
+  const menuGroups = [
+    {
+      title: "Main",
+      items: [
+        { icon: <FaHome />, label: "Dashboard", url: "/dashboard" },
+      ],
+    },
+    {
+      title: "Medical",
+      items: [
+        { icon: <FaCalendarAlt />, label: "Schedules", url: "/schedules" },
+        { icon: <FaUserFriends />, label: "Consultations", url: "/consultations" },
+        { icon: <FaClipboardList />, label: "Bookings", url: "/bookings" },
+      ],
+    },
+    {
+      title: "Pharmacy",
+      items: [
+        { icon: <FaFileMedical />, label: "Recipes", url: "/recipes" },
+        { icon: <FaPills />, label: "Drugs", url: "/drugs" },
+      ],
+    },
+    {
+      title: "Administration",
+      items: [
+        { icon: <FaUserMd />, label: "Doctor", url: "/doctor" },
+        { icon: <FaUserFriends />, label: "Users", url: "/user" },
+        { icon: <FaStethoscope />, label: "Category Specialist", url: "/category-spesialis" },
+      ],
+    },
+  ];
 
   return (
     <aside
@@ -94,42 +80,53 @@ const menuItems = [
       </div>
 
       {/* MENU */}
-      <nav className="flex-1 px-4 py-8 space-y-3">
-        {menuItems.map((item, index) => {
-          const active =
-          pathname === item.url ||
-          pathname.startsWith(item.url + "/");
+      <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto custom-scrollbar">
+        {menuGroups.map((group, index) => (
+          <div key={index} className="space-y-2">
+            {/* Group Title */}
+            {!collapsed && (
+              <h3 className="px-4 text-xs font-semibold text-blue-200 uppercase tracking-wider mb-2">
+                {group.title}
+              </h3>
+            )}
+            
+            {/* Group Items */}
+            {group.items.map((item, itemIdx) => {
+              const active =
+                pathname === item.url ||
+                pathname.startsWith(item.url + "/");
 
-          return (
-            <Link key={index} href={item.url}>
-              <div
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-200
-                  
-                  ${
-                    active
-                      ? "bg-blue-800 shadow-md"
-                      : "hover:bg-blue-700/60"
-                  }
-                `}
-              >
-                <span className="text-lg">{item.icon}</span>
+              return (
+                <Link key={itemIdx} href={item.url}>
+                  <div
+                    className={`flex items-center gap-4 px-4 py-3.5 rounded-xl cursor-pointer transition-all duration-200 mt-1
+                      ${
+                        active
+                          ? "bg-blue-800 shadow-md"
+                          : "hover:bg-blue-700/60"
+                      }
+                    `}
+                  >
+                    <span className="text-lg">{item.icon}</span>
 
-                {!collapsed && (
-                  <span className="text-sm font-medium">
-                    {item.label}
-                  </span>
-                )}
-              </div>
-            </Link>
-          );
-        })}
+                    {!collapsed && (
+                      <span className="text-sm font-medium">
+                        {item.label}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* LOGOUT */}
       <div className="p-4 border-t border-blue-400/30">
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-         className="flex items-center gap-4 w-full px-4 py-3 rounded-xl hover:bg-red-500/90 transition-all duration-200"
+          className="flex items-center gap-4 w-full px-4 py-3 rounded-xl hover:bg-red-500/90 transition-all duration-200"
         >
           <FiLogOut className="text-lg" />
 

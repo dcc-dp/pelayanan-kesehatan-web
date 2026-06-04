@@ -1,20 +1,16 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../recipes/components/addModal";
-import EditModal from "../recipes/components/editModal";
+import AddModal from "./components/addModal";
+import EditModal from "./components/editModal";
 import { FiSearch } from "react-icons/fi";
 
-const DataRecipes = () => {
-  const router = useRouter();
-
-  const [recipesData, setRecipesData] = useState([]);
+const DataSchedules = () => {
+  const [schedulesData, setSchedulesData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const [filterDokter, setFilterDokter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -25,12 +21,14 @@ const DataRecipes = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/recipes");
+      const response = await fetch("/api/schedules");
 
-      if (!response.ok) throw new Error("Gagal memuat data");
+      if (!response.ok) {
+        throw new Error("Gagal memuat data jadwal");
+      }
 
       const data = await response.json();
-      setRecipesData(data);
+      setSchedulesData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -43,19 +41,23 @@ const DataRecipes = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Yakin ingin menghapus data ini?")) return;
+    if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
 
     try {
-      const response = await fetch("/api/recipes", {
+      const response = await fetch(`/api/schedules`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus resep");
+      if (!response.ok) {
+        throw new Error("Gagal menghapus jadwal");
+      }
 
-      setRecipesData((prev) => prev.filter((item) => item.id !== id));
-      alert("Resep berhasil dihapus!");
+      setSchedulesData((prev) => prev.filter((item) => item.id !== id));
+      alert("Jadwal berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
@@ -63,19 +65,15 @@ const DataRecipes = () => {
   };
 
   const filteredData = useMemo(() => {
-    return recipesData.filter((item) => {
-      const searchMatch =
-        !searchQuery ||
-        Object.values(item).some((val) =>
-          String(val).toLowerCase().includes(searchQuery.toLowerCase())
-        );
-
-      const filterMatch =
-        filterDokter === "all" ? true : item.dokter === filterDokter;
-
-      return searchMatch && filterMatch;
+    return schedulesData.filter((item) => {
+      if (!searchQuery) return true;
+      return Object.values(item).some((val) =>
+        String(val || "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      );
     });
-  }, [recipesData, searchQuery, filterDokter]);
+  }, [schedulesData, searchQuery]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -83,17 +81,19 @@ const DataRecipes = () => {
   const currentData = filteredData.slice(startIndex, endIndex);
 
   return (
-    <div className="flex min-h-screen bg-slate-50 w-full overflow-hidden">
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
 
-      <main className="flex-1 p-8 min-w-0 overflow-y-auto">
+      <main className="flex-1 p-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800">Recipes</h1>
+          <h1 className="text-3xl font-semibold text-gray-800">
+            Schedule Management
+          </h1>
           <div className="flex items-center gap-3 mt-2 text-sm">
             <span className="text-blue-600 font-medium">Dashboard</span>
             <span className="text-gray-400">›</span>
-            <span className="text-gray-500">Recipes</span>
+            <span className="text-gray-500">Schedules</span>
           </div>
         </div>
 
@@ -112,14 +112,14 @@ const DataRecipes = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
             </div>
             <div>
-              <p className="text-gray-500 text-sm">Total Recipes</p>
+              <p className="text-gray-500 text-sm">Total Schedules</p>
               <h2 className="text-4xl font-semibold text-gray-900">
-                {recipesData.length}
+                {schedulesData.length}
               </h2>
             </div>
           </div>
@@ -127,34 +127,20 @@ const DataRecipes = () => {
 
         {/* Table Card */}
         <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden mt-2">
-          <div className="px-8 py-6 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-gray-100">
-            <h2 className="text-[22px] font-semibold text-gray-800 shrink-0">
-              Recipes List
+          <div className="px-8 py-6 flex justify-between items-center border-b border-gray-100">
+            <h2 className="text-[22px] font-semibold text-gray-800">
+              Schedule List
             </h2>
-            <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+            <div className="flex items-center gap-4">
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search recipes..."
+                  placeholder="Search schedule..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-[260px] h-[46px] border border-gray-200 rounded-xl pl-4 pr-12 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
                 />
                 <FiSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
-              </div>
-              <div className="relative">
-                <select
-                  value={filterDokter}
-                  onChange={(e) => setFilterDokter(e.target.value)}
-                  className="h-[46px] px-4 border border-gray-200 rounded-xl text-gray-600 bg-white"
-                >
-                  <option value="all">Semua Dokter</option>
-                  {[...new Set(recipesData.map((item) => item.dokter).filter(Boolean))].map((name, index) => (
-                    <option key={`${name}-${index}`} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <button
@@ -162,7 +148,7 @@ const DataRecipes = () => {
                 className="h-[46px] px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 font-medium transition"
               >
                 <span className="text-lg">+</span>
-                Add Recipe
+                Add Schedule
               </button>
             </div>
           </div>
@@ -176,16 +162,16 @@ const DataRecipes = () => {
           )}
 
           {!loading && !error && (
-            <div className="overflow-x-auto w-full">
-              <table className="w-full whitespace-nowrap min-w-max">
+            <div className="overflow-x-auto">
+              <table className="w-full">
                 <thead className="bg-[#f8fafc]">
                   <tr>
                     <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">#</th>
-                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">ID</th>
                     <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Pasien</th>
                     <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Dokter</th>
-                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Tgl Buat</th>
-                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Tgl Ubah</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Tanggal</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Waktu</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Status</th>
                     <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
@@ -194,22 +180,24 @@ const DataRecipes = () => {
                     currentData.map((item, index) => (
                       <tr key={item.id} className="border-t hover:bg-gray-50">
                         <td className="px-6 py-4 text-black">{startIndex + index + 1}</td>
-                        <td className="px-6 py-4 text-black">{item.id}</td>
-                        <td className="px-6 py-4 font-medium text-black">{item.pasien}</td>
-                        <td className="px-6 py-4 text-gray-600">{item.dokter}</td>
+                        <td className="px-6 py-4 font-medium text-black">{item.nama_pasien || "-"}</td>
+                        <td className="px-6 py-4 text-gray-600">{item.nama_dokter || "-"}</td>
                         <td className="px-6 py-4 text-black">
-                          {item.created_at ? new Date(item.created_at).toLocaleDateString() : "-"}
+                           {item.date ? new Date(item.date).toLocaleDateString() : "-"}
                         </td>
-                        <td className="px-6 py-4 text-black">
-                          {item.updated_at ? new Date(item.updated_at).toLocaleDateString() : "-"}
+                        <td className="px-6 py-4 text-black font-semibold">
+                          {item.time ? new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "-"}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
+                            item.status === 'terima' ? 'bg-green-100 text-green-700' :
+                            item.status === 'tolak' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {item.status}
+                          </span>
                         </td>
                         <td className="px-6 py-4 flex gap-2">
-                          <button
-                            onClick={() => router.push(`../recipes/${item.id}/details`)}
-                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg"
-                          >
-                            Detail
-                          </button>
                           <button
                             onClick={() => {
                               setEditId(item.id);
@@ -232,9 +220,11 @@ const DataRecipes = () => {
                     <tr>
                       <td colSpan={7} className="text-center py-10 text-gray-500">
                         <div className="h-[260px] flex flex-col items-center justify-center">
-                          <div className="text-6xl mb-5 opacity-30">📁</div>
-                          <h3 className="font-semibold text-gray-700">Tidak ada data recipes.</h3>
-                          <p className="text-gray-400 mt-2">Klik tombol "Add Recipe" untuk menambahkan resep baru.</p>
+                          <div className="text-6xl mb-5 opacity-30">📅</div>
+                          <h3 className="font-semibold text-gray-700">Tidak ada jadwal.</h3>
+                          <p className="text-gray-400 mt-2">
+                            Klik tombol "Add Schedule" untuk membuat jadwal baru.
+                          </p>
                         </div>
                       </td>
                     </tr>
@@ -244,13 +234,14 @@ const DataRecipes = () => {
 
               <div className="flex justify-between items-center px-8 py-6 border-t border-gray-100">
                 <p className="text-sm text-gray-500">
-                  Showing {filteredData.length === 0 ? 0 : startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} results
+                  Showing {filteredData.length === 0 ? 0 : startIndex + 1} to{" "}
+                  {Math.min(endIndex, filteredData.length)} of {filteredData.length} results
                 </p>
                 <div className="flex gap-2">
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((prev) => prev - 1)}
-                    className="w-10 h-10 border border-gray-200 rounded-lg"
+                    className="w-10 h-10 border border-gray-200 rounded-lg disabled:opacity-50"
                   >
                     «
                   </button>
@@ -259,7 +250,9 @@ const DataRecipes = () => {
                       key={i}
                       onClick={() => setCurrentPage(i + 1)}
                       className={`w-10 h-10 rounded-lg ${
-                        currentPage === i + 1 ? "bg-blue-600 text-white" : "border border-gray-200"
+                        currentPage === i + 1
+                          ? "bg-blue-600 text-white"
+                          : "border border-gray-200 hover:bg-gray-50"
                       }`}
                     >
                       {i + 1}
@@ -268,7 +261,7 @@ const DataRecipes = () => {
                   <button
                     disabled={currentPage === totalPages || totalPages === 0}
                     onClick={() => setCurrentPage((prev) => prev + 1)}
-                    className="w-10 h-10 border border-gray-200 rounded-lg"
+                    className="w-10 h-10 border border-gray-200 rounded-lg disabled:opacity-50"
                   >
                     »
                   </button>
@@ -279,10 +272,24 @@ const DataRecipes = () => {
         </div>
       </main>
 
-      <AddModal open={openAdd} onClose={() => setOpenAdd(false)} onSuccess={loadData} />
-      <EditModal open={openEdit} onClose={() => setOpenEdit(false)} id={editId} onSuccess={loadData} />
+      {openAdd && (
+        <AddModal
+          open={openAdd}
+          onClose={() => setOpenAdd(false)}
+          onSuccess={loadData}
+        />
+      )}
+
+      {openEdit && (
+        <EditModal
+          open={openEdit}
+          onClose={() => setOpenEdit(false)}
+          id={editId}
+          onSuccess={loadData}
+        />
+      )}
     </div>
   );
 };
 
-export default DataRecipes;
+export default DataSchedules;

@@ -1,18 +1,21 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { FaClipboardList } from "react-icons/fa";
-import { FiSearch } from "react-icons/fi";
+import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../details/components/addModal";
-import EditModal from "../details/components/editModal";
+import AddModal from "./components/addModal";
+import EditModal from "./components/editModal";
+import { FiSearch, FiArrowLeft } from "react-icons/fi";
 
 const DataDetails = () => {
   const router = useRouter();
+  const params = useParams();
+  const recipesId = params.id;
 
   const [detailsData, setDetailsData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,11 +23,10 @@ const DataDetails = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  // 🔄 Load Data
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/details");
+      const response = await fetch(`/api/details?recipes_id=${recipesId}`);
 
       if (!response.ok) throw new Error("Gagal memuat data");
 
@@ -38,10 +40,11 @@ const DataDetails = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (recipesId) {
+      loadData();
+    }
+  }, [recipesId]);
 
-  // 🗑️ Hapus Data
   const handleDelete = async (id) => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
@@ -52,17 +55,16 @@ const DataDetails = () => {
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus resep");
+      if (!response.ok) throw new Error("Gagal menghapus detail obat");
 
       setDetailsData((prev) => prev.filter((item) => item.id !== id));
-      alert("Resep berhasil dihapus!");
+      alert("Detail obat berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
       console.error(error);
     }
   };
 
-  // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
     if (!searchQuery) return detailsData;
 
@@ -73,162 +75,206 @@ const DataDetails = () => {
     );
   }, [detailsData, searchQuery]);
 
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredData.slice(startIndex, endIndex);
+
   return (
-    <div className="flex min-h-screen font-sans">
+    <div className="flex min-h-screen bg-slate-50 w-full overflow-hidden">
       <Sidebar />
 
-      <main className="flex-1 bg-[#fefbff] p-6">
+      <main className="flex-1 p-8 min-w-0 overflow-y-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <h1 className="text-2xl font-semibold flex items-center gap-2 text-black">
-            <FaClipboardList />
-            Daftar Resep
-          </h1>
-
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <div className="flex items-center w-full border border-gray-300 rounded-md">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="px-4 py-1 rounded-l-md focus:outline-none text-black w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button className="bg-pink-300 p-2 rounded-r-md text-white">
-                <FiSearch />
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => router.push('/recipes')}
+                className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-200 hover:bg-gray-50 text-gray-600 transition"
+              >
+                <FiArrowLeft size={20} />
               </button>
+              <h1 className="text-3xl font-semibold text-gray-800">Recipe Details</h1>
             </div>
-
-            <button
-              onClick={() => setOpenAdd(true)}
-              className="bg-pink-300 text-white px-4 py-2 rounded"
-            >
-              Tambah detail obat
-            </button>
+            <div className="flex items-center gap-3 mt-2 text-sm ml-14">
+              <span className="text-blue-600 font-medium">Dashboard</span>
+              <span className="text-gray-400">›</span>
+              <span className="text-blue-600 font-medium cursor-pointer" onClick={() => router.push('/recipes')}>Recipes</span>
+              <span className="text-gray-400">›</span>
+              <span className="text-gray-500">Details</span>
+            </div>
           </div>
         </div>
 
-        {/* Loading & Error */}
-        {loading && (
-          <div className="text-center text-gray-600">Memuat data...</div>
-        )}
+        {/* Summary */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 w-[430px]">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-8 h-8 text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Total Obat</p>
+              <h2 className="text-4xl font-semibold text-gray-900">
+                {detailsData.length}
+              </h2>
+            </div>
+          </div>
+        </div>
 
-        {error && (
-          <div className="text-center text-red-600">Error: {error}</div>
-        )}
+        {/* Table Card */}
+        <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden mt-2">
+          <div className="px-8 py-6 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-gray-100">
+            <h2 className="text-[22px] font-semibold text-gray-800 shrink-0">
+              Obat Resep List
+            </h2>
+            <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search details..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-[260px] h-[46px] border border-gray-200 rounded-xl pl-4 pr-12 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                />
+                <FiSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+              </div>
 
-        {/* Table */}
-        {!loading && !error && (
-          <div className="overflow-x-auto shadow-md rounded-lg text-black">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-pink-300">
-                <tr>
-                  {[
-                    "No",
-                    "ID",
-                    "nama Pasien",
-                    "nama Dokter",
-                    "nama obat",
-                    "jumlah minum",
-                    "jumlah hari",
-                    "waktu minum",
-                    "Tgl Buat",
-                    "Tgl Ubah",
-                    "Aksi",
-                  ].map((header, i) => (
-                    <th
-                      key={i}
-                      className="px-6 py-3 text-left text-xs font-medium text-white uppercase"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+              <button
+                onClick={() => setOpenAdd(true)}
+                className="h-[46px] px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 font-medium transition"
+              >
+                <span className="text-lg">+</span>
+                Add Obat
+              </button>
+            </div>
+          </div>
 
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.length > 0 ? (
-                  filteredData.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-gray-100">
-                      <td className="px-6 py-4">{index + 1}</td>
-                      <td className="px-6 py-4">{item.id}</td>
-                      <td className="px-6 py-4">{item.nm_pasien}</td>
-                      <td className="px-6 py-4">{item.nm_dokter}</td>
-                      <td className="px-6 py-4">{item.nama_obat}</td>
-                      <td className="px-6 py-4">{item.jumlah_minum}</td>
-                      <td className="px-6 py-4">{item.jumlah_hari}</td>
-                      <td className="px-6 py-4">{item.waktu_minum}</td>
-                      <td className="px-6 py-4">
-                        {item.created_at
-                          ? new Date(item.created_at).toLocaleString()
-                          : "-"}
-                      </td>
-                      <td className="px-6 py-4">
-                        {item.updated_at
-                          ? new Date(item.updated_at).toLocaleString()
-                          : "-"}
-                      </td>
+          {loading && (
+            <div className="p-10 text-center text-gray-500">Memuat data...</div>
+          )}
 
-                      {/* 🔘 AKSI */}
-                      <td className="px-6 py-4 flex gap-2">
-                        <button
-                          onClick={() =>
-                            router.push(`../recipes/${item.id}/details`)
-                          }
-                          className="bg-green-500 text-white px-3 py-1 rounded"
-                        >
-                          Detail
-                        </button>
+          {error && (
+            <div className="p-10 text-center text-red-500">{error}</div>
+          )}
 
-                        <button
-                          onClick={() => {
-                            setEditId(item.id);
-                            setOpenEdit(true);
-                          }}
-                          className="bg-blue-500 text-white px-3 py-1 rounded"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="bg-red-500 text-white px-3 py-1 rounded"
-                        >
-                          Hapus
-                        </button>
+          {!loading && !error && (
+            <div className="overflow-x-auto w-full">
+              <table className="w-full whitespace-nowrap min-w-max">
+                <thead className="bg-[#f8fafc]">
+                  <tr>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">#</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">ID</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Pasien</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Dokter</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Nama Obat</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Jumlah Total</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Jml Minum</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Jml Hari</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Waktu Minum</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Tgl Ubah</th>
+                    <th className="px-6 py-5 text-left text-[15px] font-semibold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.length > 0 ? (
+                    currentData.map((item, index) => (
+                      <tr key={item.id} className="border-t hover:bg-gray-50">
+                        <td className="px-6 py-4 text-black">{startIndex + index + 1}</td>
+                        <td className="px-6 py-4 text-black">{item.id}</td>
+                        <td className="px-6 py-4 font-medium text-black">{item.nm_pasien}</td>
+                        <td className="px-6 py-4 text-gray-600">{item.nm_dokter}</td>
+                        <td className="px-6 py-4 text-blue-600 font-medium">{item.nama_drug}</td>
+                        <td className="px-6 py-4 text-black font-semibold">{item.jumlah}</td>
+                        <td className="px-6 py-4 text-black">{item.jumlah_minum}</td>
+                        <td className="px-6 py-4 text-black">{item.jumlah_hari}</td>
+                        <td className="px-6 py-4 text-gray-600">
+                          {item.waktu_minum === "before_eat" ? "Sebelum Makan" : 
+                           item.waktu_minum === "after_eat" ? "Sesudah Makan" : item.waktu_minum}
+                        </td>
+                        <td className="px-6 py-4 text-black">
+                          {item.updated_at ? new Date(item.updated_at).toLocaleDateString() : "-"}
+                        </td>
+                        <td className="px-6 py-4 flex gap-2">
+                          <button
+                            onClick={() => {
+                              setEditId(item.id);
+                              setOpenEdit(true);
+                            }}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={10} className="text-center py-10 text-gray-500">
+                        <div className="h-[260px] flex flex-col items-center justify-center">
+                          <div className="text-6xl mb-5 opacity-30">📁</div>
+                          <h3 className="font-semibold text-gray-700">Tidak ada obat pada resep ini.</h3>
+                          <p className="text-gray-400 mt-2">Klik tombol "Add Obat" untuk menambahkannya.</p>
+                        </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      className="px-6 py-4 text-center text-gray-500"
+                  )}
+                </tbody>
+              </table>
+
+              <div className="flex justify-between items-center px-8 py-6 border-t border-gray-100">
+                <p className="text-sm text-gray-500">
+                  Showing {filteredData.length === 0 ? 0 : startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} results
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                    className="w-10 h-10 border border-gray-200 rounded-lg"
+                  >
+                    «
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`w-10 h-10 rounded-lg ${
+                        currentPage === i + 1 ? "bg-blue-600 text-white" : "border border-gray-200"
+                      }`}
                     >
-                      Tidak ada data detail obat.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    className="w-10 h-10 border border-gray-200 rounded-lg"
+                  >
+                    »
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
-      {/* Modal Tambah */}
-      <AddModal
-        open={openAdd}
-        onClose={() => setOpenAdd(false)}
-        onSuccess={loadData}
-      />
-
-      {/* Modal Edit */}
-      <EditModal
-        open={openEdit}
-        onClose={() => setOpenEdit(false)}
-        id={editId}
-        onSuccess={loadData}
-      />
+      <AddModal open={openAdd} onClose={() => setOpenAdd(false)} onSuccess={loadData} recipesId={recipesId} />
+      <EditModal open={openEdit} onClose={() => setOpenEdit(false)} id={editId} onSuccess={loadData} />
     </div>
   );
 };
