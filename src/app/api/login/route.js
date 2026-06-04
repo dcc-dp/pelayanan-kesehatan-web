@@ -1,15 +1,24 @@
 import { NextResponse } from "next/server";
+import { prisma } from "../../../libs/prisma";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import mysql from "mysql2/promise";
+
+export const runtime = "nodejs";
 
 /**
- * @openapi
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: API untuk autentikasi (login)
+ */
+
+/**
+ * @swagger
  * /api/login:
  *   post:
- *     tags:
- *       - Auth
- *     summary: Login user
- *     description: Endpoint untuk login user menggunakan email dan password
+ *     summary: Login pengguna
+ *     tags: [Auth]
+ *     description: Endpoint login menggunakan email dan password
  *     requestBody:
  *       required: true
  *       content:
@@ -29,77 +38,78 @@ import mysql from "mysql2/promise";
  *     responses:
  *       200:
  *         description: Login berhasil
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 token:
- *                   type: string
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: number
- *                     email:
- *                       type: string
- *                     role:
- *                       type: string
  *       400:
- *         description: Request tidak valid
+ *         description: Email dan password wajib diisi
  *       401:
  *         description: Email atau password salah
  *       500:
- *         description: Server error
+ *         description: Terjadi kesalahan server
  */
 
 export async function POST(req) {
   try {
     const { email, password } = await req.json();
 
-    // validasi input
+    // Validasi input
     if (!email || !password) {
       return NextResponse.json(
-        { message: "Email dan password wajib diisi" },
+        {
+          success: false,
+          message: "Email dan password wajib diisi",
+        },
         { status: 400 }
       );
     }
 
-    // koneksi database
-    const db = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+    // Cari user berdasarkan email
+    const user = await prisma.users.findFirst({
+      where: {
+        email,
+      },
     });
 
-    // cari user
-    const [rows] = await db.execute(
-      "SELECT id, email, password, role FROM users WHERE email = ?",
-      [email]
-    );
-
-    if (rows.length === 0) {
+    // Jika user tidak ditemukan
+    if (!user) {
       return NextResponse.json(
-        { message: "Email atau password salah" },
+        {
+          success: false,
+          message: "Email atau password salah",
+        },
         { status: 401 }
       );
     }
 
-    const user = rows[0];
+    // ==========================
+    // CEK PASSWORD
+    // ==========================
 
-    // cek password
-    const isValid = await bcrypt.compare(password, user.password);
+    let isValid = false;
+
+    // Jika password database masih plaintext
+    if (
+      !user.password.startsWith("$2a$") &&
+      !user.password.startsWith("$2b$")
+    ) {
+      isValid = password === user.password;
+    } else {
+      // Jika password sudah bcrypt hash
+      isValid = await bcrypt.compare(
+        password,
+        user.password
+      );
+    }
+
     if (!isValid) {
       return NextResponse.json(
-        { message: "Email atau password salah" },
+        {
+          success: false,
+          message: "Email atau password salah",
+        },
         { status: 401 }
       );
     }
 
-    // generate JWT
+    // Generate JWT token
     const token = jwt.sign(
       {
         id: user.id,
@@ -107,22 +117,32 @@ export async function POST(req) {
         role: user.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      {
+        expiresIn: "1d",
+      }
     );
 
-    return NextResponse.json({
-      message: "Login berhasil",
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
+    // Hilangkan password dari response
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Login berhasil",
+        token,
+        user: userWithoutPassword,
       },
-    });
+      { status: 200 }
+    );
   } catch (error) {
     console.error("LOGIN ERROR:", error);
+
     return NextResponse.json(
-      { message: "Terjadi kesalahan server" },
+      {
+        success: false,
+        message: "Terjadi kesalahan server",
+        error: error.message,
+      },
       { status: 500 }
     );
   }

@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/src/libs/prisma";
+
 /**
  * @swagger
  * tags:
@@ -22,49 +25,42 @@
  *     responses:
  *       200:
  *         description: Data dokter berhasil diambil
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   category:
- *                     type: string
- *                     example: "Dokter Umum"
- *                   description:
- *                     type: string
- *                     example: "Dokter berpengalaman di bidang kesehatan umum."
- *                   license:
- *                     type: string
- *                     example: "LIC-2025-001"
- *                   certificate:
- *                     type: string
- *                     example: "sertifikat_dokter.pdf"
- *                   users_id:
- *                     type: integer
- *                     example: 3
  *       404:
  *         description: Dokter tidak ditemukan
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Doctor not found"
  *       500:
  *         description: Terjadi kesalahan di server
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Database connection failed"
  */
+export async function GET(request, { params }) {
+  try {
+    const id = parseInt(params.id);
+
+    const doctor = await prisma.doctor.findUnique({
+      where: { id },
+      include: {
+        users: true,
+        category_spesialis: true,
+      },
+    });
+
+    if (!doctor) {
+      return NextResponse.json(
+        { message: "Doctor not found" },
+        { status: 404 },
+      );
+    }
+
+    // format biar mirip response lama
+    const result = {
+      id: doctor.id,
+      users_id: doctor.users_id,
+      category: doctor.category_spesialis?.specialis_name || null,
+      description: doctor.description,
+      license: doctor.license,
+      certificate: doctor.certificate,
+    };
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

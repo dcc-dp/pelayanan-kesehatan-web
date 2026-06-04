@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "@/src/libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -36,24 +36,21 @@ import pool from "@/src/libs/mysql";
  *         description: Terjadi kesalahan pada server
  */
 export async function GET(request, { params }) {
-  const id = params.id;
+  const id = parseInt(params.id);
 
   try {
-    const db = await pool.getConnection();
-    const [rows] = await db.execute(
-      "SELECT * FROM category_spesialis WHERE id = ?",
-      [id]
-    );
-    db.release();
+    const data = await prisma.category_spesialis.findUnique({
+      where: { id },
+    });
 
-    if (rows.length === 0) {
+    if (!data) {
       return NextResponse.json(
         { error: "Kategori spesialis tidak ditemukan" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    return NextResponse.json(rows[0]);
+    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
