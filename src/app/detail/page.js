@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { FaClipboardList } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import Sidebar from "@/src/components/sidebar";
-import AddModal from "../details/components/addModal";
-import EditModal from "../details/components/editModal";
+import AddModal from "../detail/components/addModal";
+import EditModal from "../detail/components/editModal";
 
-const DataDetails = () => {
-  const [detailsData, setDetailsData] = useState([]);
+const DataDetail = () => {
+  const [detailData, setDetailData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,11 +22,10 @@ const DataDetails = () => {
       setLoading(true);
       const response = await fetch("/api/details");
 
-      if (!response.ok) throw new Error("Gagal memuat data");
+      if (!response.ok) throw new Error("Gagal memuat data detail");
 
       const data = await response.json();
-      console.log("DATA DARI API:", data); // 🔥 TAMBAHKAN INI
-      setDetailsData(data);
+      setDetailData(data);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -43,15 +42,15 @@ const DataDetails = () => {
     if (!confirm("Yakin ingin menghapus data ini?")) return;
 
     try {
-      const response = await fetch(`/api/details`, {
+      const response = await fetch(`/api/detail`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
-      if (!response.ok) throw new Error("Gagal menghapus detail");
+      if (!response.ok) throw new Error("Gagal menghapus konsultasi");
 
-      setDetailsData((prev) => prev.filter((item) => item.id !== id));
+      setDetailData((prev) => prev.filter((item) => item.id !== id));
       alert("detail berhasil dihapus!");
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus.");
@@ -61,17 +60,17 @@ const DataDetails = () => {
 
   // 🔍 Filter Pencarian
   const filteredData = useMemo(() => {
-    if (!searchQuery) return detailsData;
+    if (!searchQuery) return detailData;
 
-    return detailsData.filter((item) =>
+    return detailData.filter((item) =>
       Object.values(item).some((val) =>
-        String(val).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        String(val).toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
-  }, [detailsData, searchQuery]);
+  }, [detailData, searchQuery]);
 
   return (
-    <div className="flex min-h-screen font-sans text-black">
+    <div className="flex min-h-screen font-sans">
       <Sidebar />
 
       <main className="flex-1 bg-[#fefbff] p-6">
@@ -119,8 +118,10 @@ const DataDetails = () => {
                   {[
                     "No",
                     "ID",
-                    "nama pasien",
-                    "nama Dokter",
+                    "pasien",
+                    "dokter",
+                    "nama obat",
+                    "jumlah obat",
                     "jumlah minum",
                     "jumlah hari",
                     "waktu minum",
@@ -138,14 +139,19 @@ const DataDetails = () => {
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white text-black divide-y divide-gray-200">
                 {filteredData.length > 0 ? (
                   filteredData.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-gray-100">
+                    <tr
+                      key={item.id}
+                      className="hover:bg-gray-100 text-gray-800"
+                    >
                       <td className="px-6 py-4 text-sm">{index + 1}</td>
                       <td className="px-6 py-4 text-sm">{item.id}</td>
                       <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
-                      <td className="px-6 py-4 text-sm">{item.nm_pasien}</td>
+                      <td className="px-6 py-4 text-sm">{item.nm_dokter}</td>
+                      <td className="px-6 py-4 text-sm">{item.nama_drug}</td>
+                      <td className="px-6 py-4 text-sm">{item.jumlah}</td>
                       <td className="px-6 py-4 text-sm">{item.jumlah_minum}</td>
                       <td className="px-6 py-4 text-sm">{item.jumlah_hari}</td>
                       <td className="px-6 py-4 text-sm">{item.waktu_minum}</td>
@@ -188,7 +194,7 @@ const DataDetails = () => {
                       colSpan={7}
                       className="px-6 py-4 text-center text-gray-500"
                     >
-                      Tidak ada data kategori.
+                      Tidak ada data detail.
                     </td>
                   </tr>
                 )}
@@ -216,4 +222,4 @@ const DataDetails = () => {
   );
 };
 
-export default DataDetails;
+export default DataDetail;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import pool from "../../../libs/mysql";
+import { prisma } from "@/src/libs/prisma";
 
 /**
  * @swagger
@@ -13,6 +13,7 @@ import pool from "../../../libs/mysql";
  * /api/users:
  *   get:
  *     summary: Mendapatkan semua data pengguna
+ *     description: Mengambil seluruh data pengguna tanpa menampilkan password.
  *     tags: [Users]
  *     responses:
  *       200:
@@ -33,28 +34,56 @@ import pool from "../../../libs/mysql";
  *                   email:
  *                     type: string
  *                     example: "ranti@example.com"
- *                   password:
+ *                   gender:
  *                     type: string
- *                     example: "hashed_password"
+ *                     example: "perempuan"
+ *                   birth:
+ *                     type: string
+ *                     format: date
+ *                     example: "2000-01-01"
+ *                   address:
+ *                     type: string
+ *                     example: "Makassar"
+ *                   whatsapp:
+ *                     type: string
+ *                     example: "08123456789"
+ *                   image:
+ *                     type: string
+ *                     example: "/uploads/user.jpg"
+ *                   role:
+ *                     type: string
+ *                     example: "user"
  *       500:
  *         description: Terjadi kesalahan pada server
  */
 export async function GET() {
   try {
-    const db = await pool.getConnection();
-    const [rows] = await db.query("SELECT * FROM users");
-    db.release();
+    const users = await prisma.users.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        gender: true,
+        birth: true,
+        address: true,
+        whatsapp: true,
+        image: true,
+        role: true,
+      },
+    });
 
-    return NextResponse.json(rows);
+    return NextResponse.json(users);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
 /**
  * @swagger
  * /api/users:
  *   post:
  *     summary: Menambahkan pengguna baru
+ *     description: Menyimpan data user baru ke dalam database.
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -70,12 +99,31 @@ export async function GET() {
  *               name:
  *                 type: string
  *                 example: "Ranti"
- *               email:
+ *               gender:
  *                 type: string
- *                 example: "ranti@example.com"
+ *                 example: "perempuan"
+ *               birth:
+ *                 type: string
+ *                 format: date
+ *                 example: "2000-01-01"
+ *               address:
+ *                 type: string
+ *                 example: "Makassar"
+ *               whatsapp:
+ *                 type: string
+ *                 example: "08123456789"
  *               password:
  *                 type: string
  *                 example: "123456"
+ *               email:
+ *                 type: string
+ *                 example: "ranti@example.com"
+ *               image:
+ *                 type: string
+ *                 example: "/uploads/user.jpg"
+ *               role:
+ *                 type: string
+ *                 example: "user"
  *     responses:
  *       201:
  *         description: Pengguna berhasil ditambahkan
@@ -87,6 +135,9 @@ export async function GET() {
  *                 id:
  *                   type: integer
  *                   example: 10
+ *                 message:
+ *                   type: string
+ *                   example: "User berhasil ditambahkan"
  *       500:
  *         description: Terjadi kesalahan saat menambahkan pengguna
  */
@@ -94,50 +145,38 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    const {
-      name,
-      gender,
-      birth,
-      address,
-      whatsapp,
-      password,
-      email,
-      image,
-      role,
-    } = body;
-
-    const db = await pool.getConnection();
-    const query = `
-      INSERT INTO users (name, gender, birth, address, whatsapp, password, email, image, role)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const [result] = await db.execute(query, [
-      name,
-      gender,
-      birth,
-      address,
-      whatsapp,
-      password,
-      email,
-      image,
-      role,
-    ]);
-
-    db.release();
-
-    return NextResponse.json({
-      message: "User berhasil ditambahkan",
-      id: result.insertId,
+    const user = await prisma.users.create({
+      data: {
+        name: body.name,
+        gender: body.gender,
+        birth: body.birth ? new Date(body.birth) : null,
+        address: body.address,
+        whatsapp: body.whatsapp,
+        password: body.password,
+        email: body.email,
+        image: body.image,
+        role: body.role || "user",
+      },
     });
+
+    return NextResponse.json(
+      {
+        message: "User berhasil ditambahkan",
+        id: user.id,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
 /**
  * @swagger
  * /api/users:
  *   put:
- *     summary: Memperbarui data pengguna berdasarkan ID
+ *     summary: Memperbarui data pengguna
+ *     description: Mengupdate seluruh data user berdasarkan ID.
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -147,9 +186,6 @@ export async function POST(request) {
  *             type: object
  *             required:
  *               - id
- *               - name
- *               - email
- *               - password
  *             properties:
  *               id:
  *                 type: integer
@@ -157,12 +193,31 @@ export async function POST(request) {
  *               name:
  *                 type: string
  *                 example: "Ranti Updated"
- *               email:
+ *               gender:
  *                 type: string
- *                 example: "ranti_updated@example.com"
+ *                 example: "perempuan"
+ *               birth:
+ *                 type: string
+ *                 format: date
+ *                 example: "2000-01-01"
+ *               address:
+ *                 type: string
+ *                 example: "Makassar"
+ *               whatsapp:
+ *                 type: string
+ *                 example: "08123456789"
  *               password:
  *                 type: string
  *                 example: "newpassword123"
+ *               email:
+ *                 type: string
+ *                 example: "ranti_updated@example.com"
+ *               image:
+ *                 type: string
+ *                 example: "/uploads/new.jpg"
+ *               role:
+ *                 type: string
+ *                 example: "admin"
  *     responses:
  *       200:
  *         description: Pengguna berhasil diperbarui
@@ -174,6 +229,8 @@ export async function POST(request) {
  *                 message:
  *                   type: string
  *                   example: "User updated successfully"
+ *       404:
+ *         description: User tidak ditemukan
  *       500:
  *         description: Terjadi kesalahan saat memperbarui data pengguna
  */
@@ -181,55 +238,43 @@ export async function PUT(request) {
   try {
     const body = await request.json();
 
-    const {
-      id,
-      name,
-      gender,
-      birth,
-      address,
-      whatsapp,
-      password,
-      email,
-      image,
-      role,
-    } = body;
+    const existing = await prisma.users.findUnique({
+      where: { id: body.id },
+    });
 
-    const db = await pool.getConnection();
+    if (!existing) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
 
-    const query = `
-      UPDATE users
-      SET name=?, gender=?, birth=?, address=?, whatsapp=?, password=?, email=?, image=?, role=?
-      WHERE id=?
-    `;
-
-    const [result] = await db.execute(query, [
-      name,
-      gender,
-      birth,
-      address,
-      whatsapp,
-      password,
-      email,
-      image,
-      role,
-      id,
-    ]);
-
-    db.release();
+    await prisma.users.update({
+      where: { id: body.id },
+      data: {
+        name: body.name,
+        gender: body.gender,
+        birth: body.birth ? new Date(body.birth) : null,
+        address: body.address,
+        whatsapp: body.whatsapp,
+        password: body.password,
+        email: body.email,
+        image: body.image,
+        role: body.role,
+      },
+    });
 
     return NextResponse.json({
       message: "User updated successfully",
-      affectedRows: result.affectedRows,
     });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
 /**
  * @swagger
  * /api/users:
  *   delete:
- *     summary: Menghapus data pengguna berdasarkan ID
+ *     summary: Menghapus pengguna
+ *     description: Menghapus data pengguna berdasarkan ID.
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -254,21 +299,29 @@ export async function PUT(request) {
  *                 message:
  *                   type: string
  *                   example: "User deleted successfully"
+ *       404:
+ *         description: User tidak ditemukan
  *       500:
  *         description: Terjadi kesalahan saat menghapus pengguna
  */
 export async function DELETE(request) {
   try {
     const body = await request.json();
-    const { id } = body;
 
-    const db = await pool.getConnection();
-    const [result] = await db.execute("DELETE FROM users WHERE id = ?", [id]);
-    db.release();
+    const existing = await prisma.users.findUnique({
+      where: { id: body.id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    await prisma.users.delete({
+      where: { id: body.id },
+    });
 
     return NextResponse.json({
       message: "User deleted successfully",
-      affectedRows: result.affectedRows,
     });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
