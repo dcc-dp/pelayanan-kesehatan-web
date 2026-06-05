@@ -56,11 +56,13 @@ export async function GET() {
 
     const result = data.map((item) => ({
       id: item.id,
+      users_id: item.users_id,
+      doctors_id: item.doctors_id,
       date: item.date,
       time: item.time,
       status: item.status,
-      nama_pasien: item.user?.name,
-      nama_dokter: item.doctor?.user?.name,
+      nama_pasien: item.users?.name,
+      nama_dokter: item.doctor?.users?.name,
     }));
 
     return NextResponse.json(result);
@@ -112,13 +114,34 @@ export async function POST(request) {
   try {
     const data = await request.json();
 
+    if (!data.users_id || !data.doctors_id || !data.date || !data.time) {
+      return NextResponse.json(
+        { error: "users_id, doctors_id, date, dan time wajib diisi" },
+        { status: 400 },
+      );
+    }
+
+    const existing = await prisma.schedules.findFirst({
+      where: {
+        users_id: parseInt(data.users_id),
+        doctors_id: parseInt(data.doctors_id),
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "Pengajuan jadwal dengan dokter ini sudah pernah dibuat" },
+        { status: 409 },
+      );
+    }
+
     const newData = await prisma.schedules.create({
       data: {
         users_id: parseInt(data.users_id),
         doctors_id: parseInt(data.doctors_id),
         date: new Date(data.date),
         time: new Date(`1970-01-01T${data.time}`),
-        status: data.status,
+        status: data.status || "proses",
       },
     });
 

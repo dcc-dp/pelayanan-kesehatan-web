@@ -36,6 +36,8 @@ export async function GET() {
 
     const rows = data.map((c) => ({
       id: c.id,
+      users_id: c.users_id,
+      doctors_id: c.doctors_id,
       pasien: c.users?.name,
       gender: c.users?.gender,
       email: c.users?.email,
@@ -97,6 +99,20 @@ export async function POST(request) {
       return NextResponse.json(
         { error: "users_id dan doctors_id wajib diisi" },
         { status: 400 },
+      );
+    }
+
+    const existing = await prisma.consultations.findFirst({
+      where: {
+        users_id: parseInt(data.users_id),
+        doctors_id: parseInt(data.doctors_id),
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "Konsultasi dengan dokter ini sudah pernah dibuat" },
+        { status: 409 },
       );
     }
 

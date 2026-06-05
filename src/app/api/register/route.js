@@ -92,7 +92,7 @@ import bcrypt from "bcryptjs";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, password, confirmPassword } = body;
+    const { name, email, password, confirmPassword, gender, birth, address, whatsapp } = body;
 
     if (!name || !email || !password || !confirmPassword) {
       return NextResponse.json(
@@ -120,13 +120,28 @@ export async function POST(request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Mapping format gender frontend (Laki-laki / Perempuan) ke Enum database (laki_laki / perempuan)
+    let dbGender = null;
+    if (gender === "Laki-laki") dbGender = "laki_laki";
+    if (gender === "Perempuan") dbGender = "perempuan";
+
+    // Format birth (jika ada isian dari frontend misal YYYY-MM-DD)
+    let dbBirth = null;
+    if (birth) {
+      dbBirth = new Date(birth);
+    }
 
     const newUser = await prisma.users.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: "pasien",
+        gender: dbGender,
+        birth: dbBirth,
+        address: address || null,
+        whatsapp: whatsapp || null,
+        role: "user", // Otomatis role user
         created_at: new Date(),
         updated_at: new Date(),
       },
