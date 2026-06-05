@@ -88,6 +88,8 @@ export async function GET() {
 
     const result = data.map((item) => ({
       id: item.id,
+      users_id: item.users_id,
+      doctors_id: item.doctors_id,
       pasien: item.users.name,
       gender: item.users.gender,
       email: item.users.email,

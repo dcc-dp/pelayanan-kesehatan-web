@@ -111,6 +111,7 @@ export async function GET(request, { params }) {
       status: data.status,
       nama_pasien: data.users?.name,
       nama_dokter: data.doctor?.users?.name,
+      whatsapp_dokter: data.doctor?.users?.whatsapp,
     };
 
     return NextResponse.json(result);
